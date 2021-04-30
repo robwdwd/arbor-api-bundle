@@ -760,9 +760,9 @@ class REST
     private function getCacheKey($url, $args = null)
     {
         if (null === $args) {
-            return 'arbor_api_bundle_ws_'.md5($url);
+            return 'arbor_rest_'.sha1($url);
         }
 
-        return 'arbor_api_bundle_rest_'.md5($url.http_build_query($args));
+        return 'arbor_rest_'.sha1($url.http_build_query($args));
     }
 }

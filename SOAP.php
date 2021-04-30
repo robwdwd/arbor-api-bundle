@@ -252,6 +252,6 @@ class SOAP extends API
      */
     private function getCacheKey(string $xml)
     {
-        return 'arbor_api_bundle_soap_'.md5($xml);
+        return 'arbor_soap_'.sha1($xml);
     }
 }

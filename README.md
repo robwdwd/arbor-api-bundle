@@ -98,6 +98,13 @@ By default the bundle does not cache the responses from Sightline/SP. Setting ca
 configuration will cache the responses in the cache.app pool. By default it caches the response for
 five minutes (300 seconds). You can change this with the cache_ttl config setting.
 
+If you are using the filesystem cache on your symfony application you will need to manually prune the cache
+to remove stale entries from time to time. You can set this up as a cron job.
+
+```console
+php bin/console cache:pool:prune
+```
+
 ## Usage
 
 [Web Services and SOAP](doc/webservices_soap.md)

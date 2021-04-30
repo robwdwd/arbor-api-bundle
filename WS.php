@@ -194,6 +194,6 @@ class WS extends API
      */
     private function getCacheKey(string $url, $args)
     {
-        return 'arbor_api_bundle_ws_'.md5($url.http_build_query($args));
+        return 'arbor_ws_'.sha1($url.http_build_query($args));
     }
 }
