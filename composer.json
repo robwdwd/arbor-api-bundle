@@ -1,0 +1,44 @@
+{
+    "name": "robwdwd/arbor-api-bundle",
+    "type": "symfony-bundle",
+    "description": "Arbor Sightline API Symfony Bundle.",
+    "keywords": [
+        "arbor",
+        "netscout",
+        "ArborSP",
+        "arbor sightline",
+        "networking",
+        "security",
+        "ddos",
+        "symfony",
+        "symfony bundle"
+    ],
+    "homepage": "https://github.com/robwdwd/arbor-api-bundle",
+    "license": "MIT",
+    "authors": [{
+        "name": "Rob Woodward",
+        "homepage": "https://github.com/robwdwd",
+        "email": "rob@emailplus.org",
+        "role": "Author"
+    }],
+    "autoload": {
+        "psr-4": {
+            "Robwdwd\\ArborApiBundle\\": ""
+        }
+    },
+    "require": {
+        "php": "^7.2",
+        "ext-dom": "*",
+        "ext-soap": "*",
+        "symfony/config": "^4.4 || ^5.0 || ^5.1 || ^5.2",
+        "symfony/cache": "^4.4 || ^5.0 || ^5.1 || ^5.2",
+        "symfony/dependency-injection": "^4.4 || ^5.0 || ^5.1 || ^5.2",
+        "symfony/framework-bundle": "^4.4 || ^5.0 || ^5.1 || ^5.2",
+        "symfony/http-client": "^4.4 || ^5.0 || ^5.1 || ^5.2"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
+        }
+    }
+}
