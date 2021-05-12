@@ -425,6 +425,16 @@ class REST
     }
 
     /**
+     * Turn the cache on or off.
+     *
+     * @param bool $cacheOn Cache or not
+     */
+    public function shouldCache(bool $cacheOn)
+    {
+        $this->shouldCache = $cacheOn;
+    }
+
+    /**
      * Gets the current error state.
      *
      * @return bool true if there is a current error, false otherwise

@@ -19,6 +19,7 @@ abstract class API
 {
     private $hasError = false;
     private $errorMessage = '';
+    private $shouldCache;
 
     /**
      * Get traffic XML from Arbor Sightline using the web services API.
@@ -361,6 +362,16 @@ abstract class API
         }
 
         return $filterNode;
+    }
+
+    /**
+     * Turn the cache on or off.
+     *
+     * @param bool $cacheOn Cache or not
+     */
+    public function shouldCache(bool $cacheOn)
+    {
+        $this->shouldCache = $cacheOn;
     }
 
     /**

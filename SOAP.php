@@ -25,7 +25,6 @@ class SOAP extends API
     private $wsdl;
 
     private $cache;
-    private $shouldCache;
     private $cacheTtl;
 
     /**

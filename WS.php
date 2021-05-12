@@ -26,7 +26,6 @@ class WS extends API
     private $wsKey;
     private $url;
 
-    private $shouldCache;
     private $cacheTtl;
 
     private $client;
