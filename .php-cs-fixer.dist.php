@@ -9,9 +9,8 @@ $config = new PhpCsFixer\Config();
 
 return $config->setRules([
     '@PSR2' => true,
-    '@Symfony' => true,
     '@PSR12' => true,
-    '@DoctrineAnnotation' => true,
+    '@Symfony' => true,
     'array_indentation' => true,
     'array_syntax' => ['syntax' => 'short'],
     'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
