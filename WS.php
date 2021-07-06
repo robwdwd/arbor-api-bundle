@@ -9,8 +9,7 @@
  */
 
 namespace Robwdwd\ArborApiBundle;
-
-use Symfony\Contracts\Cache\CacheInterface;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -38,7 +37,7 @@ class WS extends API
      * @param CacheInterface      $cache
      * @param array               $config
      */
-    public function __construct(HttpClientInterface $client, CacheInterface $cache, array $config)
+    public function __construct(HttpClientInterface $client, CacheItemPoolInterface $cache, array $config)
     {
         $this->url = 'https://'.$config['hostname'].'/arborws/';
         $this->wsKey = $config['wskey'];

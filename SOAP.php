@@ -10,8 +10,8 @@
 
 namespace Robwdwd\ArborApiBundle;
 
-use Symfony\Contracts\Cache\CacheInterface;
-
+//use Symfony\Contracts\Cache\CacheInterface;
+use Psr\Cache\CacheItemPoolInterface;
 /**
  * Access the Arbor Sightline SOAP API.
  *
@@ -33,7 +33,7 @@ class SOAP extends API
      * @param CacheInterface $cache
      * @param array          $config
      */
-    public function __construct(CacheInterface $cache, array $config)
+    public function __construct(CacheItemPoolInterface $cache, array $config)
     {
         $this->hostname = $config['hostname'];
         $this->username = $config['username'];
