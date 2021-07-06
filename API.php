@@ -10,6 +10,9 @@
 
 namespace Robwdwd\ArborApiBundle;
 
+use DomDocument;
+use SimpleXMLElement;
+
 /**
  * Base API class for the ArborWS and ArborSOAP APIs.
  *
@@ -28,7 +31,7 @@ abstract class API
      *
      * @param string $queryXML Query XML string
      *
-     * @return string XML traffic data
+     * @return SimpleXMLElement XML traffic data
      */
     abstract public function getTrafficXML(string $queryXML);
 
@@ -52,7 +55,7 @@ abstract class API
      *
      * @return string returns a PNG image
      */
-    public function getPeerTrafficGraph(int $arborID, string $title, $startDate = '7 days ago', $endDate = 'now')
+    public function getPeerTrafficGraph(int $arborID, string $title, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $filters = [
             ['type' => 'peer', 'value' => $arborID, 'binby' => false],
@@ -67,20 +70,20 @@ abstract class API
     /**
      * Get ASN traffic graph traffic graph from Arbor Sightline.
      *
-     * @param int    $ASN       AS number
+     * @param int    $asNum     AS number
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
      *
      * @return string returns a PNG image
      */
-    public function getASNTrafficGraph(int $ASN, $startDate = '7 days ago', $endDate = 'now')
+    public function getASNTrafficGraph(int $asNum, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $filters = [
-            ['type' => 'aspath', 'value' => '_'.$ASN.'_', 'binby' => true],
+            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => true],
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);
-        $graphXML = $this->buildGraphXML('Traffic with AS'.$ASN, 'bps [+ to / - from ]', false, 986, 270);
+        $graphXML = $this->buildGraphXML('Traffic with AS'.$asNum, 'bps [+ to / - from ]', false, 986, 270);
 
         return $this->getTrafficGraph($queryXML, $graphXML);
     }
@@ -88,16 +91,16 @@ abstract class API
     /**
      * Get ASN traffic stats from Arbor Sightline.
      *
-     * @param int    $ASN       AS number
+     * @param int    $asNum     AS number
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
      *
-     * @return string returns a PNG image
+     * @return SimpleXMLElement Traffic data XML
      */
-    public function getASNTrafficXML(int $ASN, $startDate = '7 days ago', $endDate = 'now')
+    public function getASNTrafficXML(int $asNum, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $filters = [
-            ['type' => 'aspath', 'value' => '_'.$ASN.'_', 'binby' => true],
+            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => true],
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);
@@ -115,7 +118,7 @@ abstract class API
      *
      * @return string returns a PNG image
      */
-    public function getIntfTrafficGraph(int $arborID, string $title, $startDate = '7 days ago', $endDate = 'now')
+    public function getIntfTrafficGraph(int $arborID, string $title, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $filters = [
             ['type' => 'interface', 'value' => $arborID, 'binby' => false],
@@ -130,7 +133,7 @@ abstract class API
     /**
      * Get ASN traffic graph broken down by interface from Arbor Sightline.
      *
-     * @param int    $ASnum        AS number
+     * @param int    $asNum        AS number
      * @param array  $interfaceIds Array of interface IDs to filter on
      * @param string $title        Title of the graph
      * @param string $startDate    Start date for the graph
@@ -138,13 +141,13 @@ abstract class API
      *
      * @return string returns a PNG image
      */
-    public function getASNIntfTrafficGraph(int $ASnum, array $interfaceIds, string $title, $startDate = '7 days ago', $endDate = 'now')
+    public function getASNIntfTrafficGraph(int $asNum, array $interfaceIds, string $title, string $startDate = '7 days ago', string $endDate = 'now')
     {
         sort($interfaceIds, SORT_NUMERIC);
 
         $filters = [
             ['type' => 'interface', 'value' => $interfaceIds, 'binby' => true],
-            ['type' => 'aspath', 'value' => '_'.$ASnum.'_', 'binby' => false],
+            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => false],
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);
@@ -157,19 +160,19 @@ abstract class API
     /**
      * Get ASN traffic stats broken down by interface from Arbor Sightline.
      *
-     * @param int    $ASnum        AS number
+     * @param int    $asNum        AS number
      * @param array  $interfaceIds Array of interface IDs to filter on
      * @param string $startDate    Start date for the graph
      * @param string $endDate      End date for the graph
      *
-     * @return string returns traffic data XML
+     * @return SimpleXMLElement returns traffic data XML
      */
-    public function getASNIntfTrafficXML(int $ASnum, array $interfaceIds, $startDate = '7 days ago', $endDate = 'now')
+    public function getASNIntfTrafficXML(int $asNum, array $interfaceIds, string $startDate = '7 days ago', string $endDate = 'now')
     {
         sort($interfaceIds, SORT_NUMERIC);
         $filters = [
             ['type' => 'interface', 'value' => $interfaceIds, 'binby' => true],
-            ['type' => 'aspath', 'value' => '_'.$ASnum.'_', 'binby' => true],
+            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => true],
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);
@@ -187,7 +190,7 @@ abstract class API
      *
      * @return string returns a PNG image
      */
-    public function getIntfAsnTrafficGraph(int $interfaceId, string $title, $startDate = '7 days ago', $endDate = 'now')
+    public function getIntfAsnTrafficGraph(int $interfaceId, string $title, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $filters = [
             ['type' => 'interface', 'value' => $interfaceId, 'binby' => false],
@@ -208,9 +211,9 @@ abstract class API
      * @param string $startDate   Start date for the graph
      * @param string $endDate     End date for the graph
      *
-     * @return string returns traffic data XML
+     * @return SimpleXMLElement returns traffic data XML
      */
-    public function getIntfAsnTrafficXML(int $interfaceId, $startDate = '7 days ago', $endDate = 'now')
+    public function getIntfAsnTrafficXML(int $interfaceId, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $filters = [
             ['type' => 'interface', 'value' => $interfaceId, 'binby' => false],
@@ -233,7 +236,7 @@ abstract class API
      *
      * @return string returns a XML string used to Query the WS API
      */
-    public function buildQueryXML(array $filters, $startDate = '7 days ago', $endDate = 'now', $unitType = 'bps', $classes = [])
+    public function buildQueryXML(array $filters, string $startDate = '7 days ago', string $endDate = 'now', string $unitType = 'bps', array $classes = [])
     {
         $queryXML = $this->getBaseXML();
         $baseNode = $queryXML->firstChild;
@@ -349,11 +352,11 @@ abstract class API
     /**
      * Gets a base XML DOM document.
      *
-     * @return object the DOM document to use as the base XML
+     * @return DomDocument The DOM document to use as the base XML
      */
     private function getBaseXML()
     {
-        $baseXML = new \DomDocument('1.0', 'UTF-8');
+        $baseXML = new DomDocument('1.0', 'UTF-8');
         $baseXML->formatOutput = true;
         $peakflowNode = $baseXML->createElement('peakflow');
         $peakflowNode->setAttribute('version', '2.0');
@@ -365,10 +368,10 @@ abstract class API
     /**
      * Get a Dom Element for use in the Query XML.
      *
-     * @param array  $filter the filter array to build the filter node for the XML
-     * @param object $xmlDOM the DOMDocument object
+     * @param array       $filter the filter array to build the filter node for the XML
+     * @param DomDocument $xmlDOM the DOMDocument object
      *
-     * @return object the DOM element to include in the query XML
+     * @return DomDocument the DOM element to include in the query XML
      */
     private function addQueryFilter(array $filter, $xmlDOM)
     {

@@ -10,8 +10,10 @@
 
 namespace Robwdwd\ArborApiBundle;
 
-//use Symfony\Contracts\Cache\CacheInterface;
 use Psr\Cache\CacheItemPoolInterface;
+use SimpleXMLElement;
+use SoapClient;
+
 /**
  * Access the Arbor Sightline SOAP API.
  *
@@ -28,8 +30,6 @@ class SOAP extends API
     private $cacheTtl;
 
     /**
-     * @param string         $hostname  Hostname of the Arbor SP Leader
-     * @param string         $restToken REST API Key
      * @param CacheInterface $cache
      * @param array          $config
      */
@@ -46,7 +46,7 @@ class SOAP extends API
     }
 
     /**
-     * Get traffic graph from Arbor Sightline using the web services API.
+     * Get traffic graph from Arbor Sightline using the SOAP API.
      *
      * @param string $queryXML Query XML string
      * @param string $graphXML Graph format XML string
@@ -99,7 +99,7 @@ class SOAP extends API
         // If we get here theres been an error on the graph. Errors usually come
         // out as XML for traffic queries.
         //
-        $outXML = new \SimpleXMLElement($output);
+        $outXML = new SimpleXMLElement($result);
         if ($outXML->{'error-line'}) {
             foreach ($outXML->{'error-line'} as $error) {
                 $this->errorMessage .= (string) $error."\n";
@@ -115,7 +115,7 @@ class SOAP extends API
      *
      * @param string $queryXML Query XML string
      *
-     * @return string XML traffic data
+     * @return SimpleXMLElement XML traffic data
      */
     public function getTrafficXML(string $queryXML)
     {
@@ -126,7 +126,7 @@ class SOAP extends API
             $cachedItem = $this->cache->getItem($this->getCacheKey($queryXML));
 
             if ($cachedItem->isHit()) {
-                return new \SimpleXMLElement($cachedItem->get());
+                return new SimpleXMLElement($cachedItem->get());
             }
         }
 
@@ -150,7 +150,7 @@ class SOAP extends API
         // If we get here theres been an error on the graph. Errors usually come
         // out as XML for traffic queries.
         //
-        $outXML = new \SimpleXMLElement($result);
+        $outXML = new SimpleXMLElement($result);
 
         if ($outXML->{'error-line'}) {
             foreach ($outXML->{'error-line'} as $error) {
@@ -207,6 +207,8 @@ class SOAP extends API
 
     /**
      * Connect to the Arbor Sightline SOAP API.
+     *
+     * @return SoapClient
      */
     public function connect()
     {
@@ -230,7 +232,7 @@ class SOAP extends API
             'authentication' => SOAP_AUTHENTICATION_DIGEST,
         ];
 
-        $client = new \SoapClient($this->wsdl, $params);
+        $client = new SoapClient($this->wsdl, $params);
 
         if (is_soap_fault($client)) {
             $this->errorMessage = "SOAP Fault: (faultcode: ($client->faultcode), faultstring: ($client->faultstring))";

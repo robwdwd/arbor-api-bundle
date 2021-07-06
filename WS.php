@@ -9,7 +9,9 @@
  */
 
 namespace Robwdwd\ArborApiBundle;
+
 use Psr\Cache\CacheItemPoolInterface;
+use SimpleXMLElement;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -31,8 +33,6 @@ class WS extends API
     private $cache;
 
     /**
-     * @param string              $hostname Hostname of the Arbor SP Leader
-     * @param string              $wsKey    Web Services API Key
      * @param HttpClientInterface $client
      * @param CacheInterface      $cache
      * @param array               $config
@@ -94,9 +94,9 @@ class WS extends API
         // If we get here theres been an error on the graph. Errors usually come
         // out as XML for traffic queries.
         //
-        $outXML = new \SimpleXMLElement($output);
+        $outXML = new SimpleXMLElement($output);
         if ($outXML->{'error-line'}) {
-            foreach ($outXML->{'error-line'} as ${'error-line'}) {
+            foreach ($outXML->{'error-line'} as $error) {
                 $this->errorMessage .= (string) $error."\n";
             }
             $this->hasError = true;
@@ -110,7 +110,7 @@ class WS extends API
      *
      * @param string $queryXML Query XML string
      *
-     * @return string XML traffic data
+     * @return SimpleXMLElement XML traffic data
      */
     public function getTrafficXML(string $queryXML)
     {
@@ -124,7 +124,7 @@ class WS extends API
             $cachedItem = $this->cache->getItem($this->getCacheKey($url, $args));
 
             if ($cachedItem->isHit()) {
-                return new \SimpleXMLElement($cachedItem->get());
+                return new SimpleXMLElement($cachedItem->get());
             }
         }
 
@@ -137,7 +137,7 @@ class WS extends API
         // If we get here theres been an error on the graph. Errors usually come
         // out as XML for traffic queries.
         //
-        $outXML = new \SimpleXMLElement($output);
+        $outXML = new SimpleXMLElement($output);
         if ($outXML->{'error-line'}) {
             foreach ($outXML->{'error-line'} as $error) {
                 $this->errorMessage .= (string) $error."\n";
@@ -156,6 +156,14 @@ class WS extends API
         return $outXML;
     }
 
+    /**
+     * Perform HTTP Web Services request against the sightline API.
+     *
+     * @param string $url
+     * @param array  $args
+     *
+     * @return string Request output content
+     */
     private function doHTTPRequest(string $url, array $args)
     {
         $this->hasError = false;
@@ -165,8 +173,6 @@ class WS extends API
 
         try {
             $response = $this->client->request('GET', $url, ['query' => $args]);
-
-            $contentType = $response->getHeaders()['content-type'][0];
             $content = $response->getContent();
         } catch (HttpExceptionInterface | DecodingExceptionInterface | TransportExceptionInterface $e) {
             $this->hasError = true;
@@ -189,11 +195,11 @@ class WS extends API
      * Get the cache key.
      *
      * @param string $url  URL to make the request against
-     * @param string $args URL args
+     * @param array  $args URL args
      *
      * @return string cache key
      */
-    private function getCacheKey(string $url, $args)
+    private function getCacheKey(string $url, array $args)
     {
         return 'arbor_ws_'.sha1($url.http_build_query($args));
     }

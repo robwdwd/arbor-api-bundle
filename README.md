@@ -10,21 +10,21 @@ ArborAPI is a Symfony bundle to interface with Arbor Sightline deployments using
 
 ArborAPI supports the following:
 
--   Support for Arbor REST API as a service.
--   Support for Arbor Web services API as a service.
--   Support for Arbor SOAP API as a service.
--   Optional caching of Sightline responses.
--   Currently testing with Arbor SP 9.2 but should work with most 9.x versions and above.
+- Support for Arbor REST API as a service.
+- Support for Arbor Web services API as a service.
+- Support for Arbor SOAP API as a service.
+- Optional caching of Sightline responses.
+- Currently testing with Arbor SP 9.2 but should work with most 9.x versions and above.
 
 ## Requirements
 
 ArborAPI PHP Class requires the following:
 
--   PHP 7.2 or higher
--   symfony/http-client
--   symfony/cache
--   ext/dom
--   ext/soap
+- PHP 7.2 or higher
+- symfony/http-client
+- symfony/cache
+- ext/dom
+- ext/soap
 
 ## Installation
 
@@ -37,7 +37,7 @@ of the Composer documentation.
 Open a command console, enter your project directory and execute:
 
 ```console
-$ composer require robwdwd/arbor-api-bundle
+composer require robwdwd/arbor-api-bundle
 ```
 
 ### Applications that don't use Symfony Flex
@@ -48,7 +48,7 @@ Open a command console, enter your project directory and execute the
 following command to download the latest stable version of this bundle:
 
 ```console
-$ composer require arbor-api-bundle
+composer require arbor-api-bundle
 ```
 
 #### Step 2: Enable the Bundle
@@ -98,7 +98,7 @@ By default the bundle does not cache the responses from Sightline/SP. Setting ca
 configuration will cache the responses in the cache.app pool. By default it caches the response for
 five minutes (300 seconds). You can change this with the cache_ttl config setting.
 
-You can turn on and off the cache in the current instance using the `shouldCache(bool)` function. 
+You can turn on and off the cache in the current instance using the `shouldCache(bool)` function.
 `$restApi->shouldCache(false)`
 
 If you are using the filesystem cache on your symfony application you will need to manually prune the cache
@@ -113,3 +113,4 @@ php bin/console cache:pool:prune
 [Web Services and SOAP](doc/webservices_soap.md)
 
 [REST API](doc/rest.md)
+  
