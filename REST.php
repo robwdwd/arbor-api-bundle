@@ -35,8 +35,11 @@ class REST
     private $errorMessages = [];
 
     /**
-     * @param string $hostname  Hostname of the Arbor SP Leader
-     * @param string $restToken REST API Key
+     * Contructor.
+     *
+     * @param HttpClientInterface $client
+     * @param CacheInterface      $cache
+     * @param array               $config Configuration
      */
     public function __construct(HttpClientInterface $client, CacheInterface $cache, array $config)
     {
@@ -50,14 +53,14 @@ class REST
     }
 
     /**
-     * Gets multiple managed objects with optional search fields.
+     * Gets multiple managed objects with optional search filters.
      *
-     * @param string $filters array of filters
-     * @param int    $perPage Number of pages to get from the server at a time. Default 50.
+     * @param array $filters Search Filters
+     * @param int   $perPage Number of pages to get from the server at a time. Default 50.
      *
-     * @return string Returns a json string with the records from the API
+     * @return array Returns an array with the records from the API
      */
-    public function getManagedObjects($filters = null, $perPage = 50)
+    public function getManagedObjects(?array $filters = null, int $perPage = 50)
     {
         return $this->findRest('managed_objects', $filters, $perPage);
     }
@@ -68,14 +71,14 @@ class REST
      * @param string $name            Name of the managed object to create
      * @param string $family          Managed object family: peer, profile or customer
      * @param string $tags            Tags to add the the managed object
-     * @param string $matchType       what type this match is, cidr_blocks for example
-     * @param string $match           what to match against
-     * @param object $relationships   Object for relationships to this managed object. See Arbor SDK Docs.
-     * @param object $extraAttributes Object for extra attributes to add to this managed object. See Arbor SDK Docs.
+     * @param string $matchType       What type this match is, cidr_blocks for example
+     * @param string $match           What to match against
+     * @param array  $relationships   Relationships to this managed object. See Arbor SDK Docs.
+     * @param array  $extraAttributes Extra attributes to add to this managed object. See Arbor SDK Docs.
      *
-     * @return object returns a json decoded object with the result
+     * @return array|null the output of the API call, null otherwise
      */
-    public function createManagedObject($name, $family, $tags, $matchType, $match, $relationships = null, $extraAttributes = null)
+    public function createManagedObject(string $name, string $family, string $tags, string $matchType, string $match, ?array $relationships = null, ?array $extraAttributes = null)
     {
         $url = $this->url.'/managed_objects/';
 
@@ -130,14 +133,14 @@ class REST
     /**
      * Change a managed object.
      *
-     * @param string $arborID       managed object ID to change
-     * @param string $attributes    Attributes to change on the managed object.
+     * @param string $arborID       Managed object ID to change
+     * @param array  $attributes    Attributes to change on the managed object.
      *                              See Arbor API documentation for a full list of attributes.
-     * @param object $relationships Object for relationships to this managed object. See Arbor SDK Docs.
+     * @param array  $relationships Relationships to this managed object. See Arbor SDK Docs.
      *
-     * @return object returns a json decoded object with the result
+     * @return array|null the output of the API call, null otherwise
      */
-    public function changeManagedObject($arborID, $attributes, $relationships = null)
+    public function changeManagedObject(string $arborID, array $attributes, ?array $relationships = null)
     {
         $url = $this->url.'/managed_objects/'.$arborID;
 
@@ -161,12 +164,12 @@ class REST
     /**
      * Gets mitigations optional filters (See Arbor API Documents).
      *
-     * @param string $filters Filters
-     * @param int    $perPage Number of pages to get from the server at a time. Default 50.
+     * @param array $filters Filters
+     * @param int   $perPage Number of pages to get from the server at a time. Default 50.
      *
-     * @return string Returns a json string with the records from the API
+     * @return array|null the output of the API call, null otherwise
      */
-    public function getMitigations($filters = null, $perPage = 50)
+    public function getMitigations(?array $filters = null, int $perPage = 50)
     {
         return $this->findRest('mitigations', $filters, $perPage);
     }
@@ -174,12 +177,12 @@ class REST
     /**
      * Gets multiple mitigation templates with optional filters (See Arbor API Documents).
      *
-     * @param string $filters Filters
-     * @param int    $perPage Number of pages to get from the server at a time. Default 50.
+     * @param array $filters Filters
+     * @param int   $perPage Number of pages to get from the server at a time. Default 50.
      *
-     * @return string Returns a json string with the records from the API
+     * @return array|null the output of the API call, null otherwise
      */
-    public function getMitigationTemplates($filters = null, $perPage = 50)
+    public function getMitigationTemplates(?array $filters = null, int $perPage = 50)
     {
         return $this->findRest('mitigation_templates', $filters, $perPage);
     }
@@ -187,13 +190,13 @@ class REST
     /**
      * Gets multiple mitigation templates with optional filters (See Arbor API Documents).
      *
-     * @param int    $templateID  Templte ID to copy
+     * @param string $templateID  Template ID to copy
      * @param string $name        New name for copied mitigation template
      * @param string $description New description for copied mitigation template
      *
-     * @return string Returns a json string with the records from the API
+     * @return array|null the output of the API call, null otherwise
      */
-    public function copyMitigationTemplate($templateID, $name, $description)
+    public function copyMitigationTemplate(string $templateID, string $name, string $description)
     {
         $existingTemplate = $this->getByID('mitigation_templates', $templateID);
 
@@ -201,39 +204,26 @@ class REST
             return;
         }
 
-        $out = $this->createMitigationTemplate(
-            $name,
-            $existingTemplate['data']['attributes']['ip_version'],
-            $description,
-            $existingTemplate['data']['attributes']['subobject'],
-            $existingTemplate['data']['relationships'],
-            $existingTemplate['data']['attributes']['subtype']
-        );
+        $out = $this->createMitigationTemplate($name, $existingTemplate['data']['attributes']['ip_version'], $description, $existingTemplate['data']['attributes']['subobject'], $existingTemplate['data']['relationships'], $existingTemplate['data']['attributes']['subtype']);
 
         return $out;
     }
 
     /**
-     * Create a new mitigation template.
+     * Create a new mitigation template. See Arbor SDK Docs for countermeasure and relationship
+     * settings.
      *
      * @param string $name            Name of the mitigation template to create
      * @param string $ipVersion       IP Version of the mitigation template
-     * @param object $relationships   Object for relationships to this mitigation template. See Arbor SDK Docs.
-     * @param object $extraAttributes Object for extra attributes to add to this mitigation template. See Arbor SDK Docs.
-     * @param mixed  $description
-     * @param mixed  $countermeasures
-     * @param mixed  $subtype
+     * @param string $description     Description of mitigation template
+     * @param array  $countermeasures Countermeasure settings for this mitigation template
+     * @param array  $relationships   Relationships to this mitigation template. See Arbor SDK Docs
+     * @param string $subtype         Subtype for this mitigation template
      *
-     * @return object returns a json decoded object with the result
+     * @return array|null The output of the API call, null otherwise
      */
-    public function createMitigationTemplate(
-        $name,
-        $ipVersion,
-        $description,
-        $countermeasures,
-        $relationships = [],
-        $subtype = 'tms'
-    ) {
+    public function createMitigationTemplate(string $name, string $ipVersion, string $description, array $countermeasures, array $relationships = [], string $subtype = 'tms')
+    {
         $url = $this->url.'/mitigation_templates/';
 
         // Add in the required attributes for a managed object.
@@ -266,14 +256,14 @@ class REST
     /**
      * Change a mitigation template.
      *
-     * @param string $arborID       mitigation template ID to change
-     * @param string $attributes    Attributes to change on the managed object.
+     * @param string $arborID       Mitigation template ID to change
+     * @param array  $attributes    Attributes to change on the managed object.
      *                              See Arbor API documentation for a full list of attributes.
-     * @param object $relationships Object for relationships to this managed object. See Arbor SDK Docs.
+     * @param array  $relationships Relationships to this managed object. See Arbor SDK Docs.
      *
-     * @return object returns a json decoded object with the result
+     * @return array|null the output of the API call, null otherwise
      */
-    public function changeMitigationTemplate($arborID, $attributes, $relationships = null)
+    public function changeMitigationTemplate(string $arborID, array $attributes, ?array $relationships = null)
     {
         $url = $this->url.'/mitigation_templates/'.$arborID;
 
@@ -297,12 +287,12 @@ class REST
     /**
      * Gets multiple notification Groups with optional search.
      *
-     * @param array $filters Filters array
+     * @param array $filters Search filters
      * @param int   $perPage Number of pages to get from the server at a time. Default 50.
      *
-     * @return string Returns a json string with the records from the API
+     * @return array|null the output of the API call, null otherwise
      */
-    public function getNotificationGroups($filters = null, $perPage = 50)
+    public function getNotificationGroups(?array $filters = null, int $perPage = 50)
     {
         return $this->findRest('notification_groups', $filters, $perPage);
     }
@@ -311,12 +301,12 @@ class REST
      * Create a new managed object.
      *
      * @param string $name            Name of the managed object to create
-     * @param array  $emailAddresses  array of email addresses to add to the notification group
-     * @param object $extraAttributes Object for extra attributes to add to this notification group. See Arbor SDK Docs.
+     * @param array  $emailAddresses  Email addresses to add to the notification group
+     * @param array  $extraAttributes Extra attributes to add to this notification group. See Arbor SDK Docs.
      *
-     * @return object returns a json decoded object with the result
+     * @return array|null the output of the API call, null otherwise
      */
-    public function createNotificationGroup($name, $emailAddresses = null, $extraAttributes = null)
+    public function createNotificationGroup(string $name, ?array $emailAddresses = null, ?array $extraAttributes = null)
     {
         $url = $this->url.'/notification_groups/';
 
@@ -354,13 +344,13 @@ class REST
     /**
      * Change a notification group.
      *
-     * @param string $arborID    notification group ID to change
-     * @param string $attributes attributes to change on the notifciation group
+     * @param string $arborID    Notification group ID to change
+     * @param array  $attributes Attributes to change on the notifciation group
      *                           See Arbor API documentation for a full list of attributes
      *
-     * @return object returns a json decoded object with the result
+     * @return array|null the output of the API call, null otherwise
      */
-    public function changeNotificationGroup($arborID, $attributes)
+    public function changeNotificationGroup(string $arborID, array $attributes)
     {
         $url = $this->url.'/notification_groups/'.$arborID;
 
@@ -380,12 +370,12 @@ class REST
     /**
      * Get an object by it's ID.
      *
-     * @param string endpoint Type of object to get. managed_object etc
-     * @param string id   object ID
+     * @param string $endpoint Type of object to get. managed_object etc
+     * @param string $arborID  Object ID
      *
-     * @return object returns a json decoded object with the result
+     * @return array|null the output of the API call, null otherwise
      */
-    public function getByID($endpoint, $arborID)
+    public function getByID(string $endpoint, string $arborID)
     {
         $url = $this->url.$endpoint.'/'.$arborID;
 
@@ -396,15 +386,14 @@ class REST
      * Find or search Arbor SP REST API for a particular record or set of
      * records.
      *
-     * @param string     $endpoint endpoint type, Managed Object, Mitigations etc.
-     *                             See Arbor API documenation for endpoint list.
-     * @param array      $filters  Filters array
-     * @param int        $perPage  limit the number of returned objects per page
-     * @param mixed|null $filters
+     * @param string $endpoint Endpoint type, Managed Object, Mitigations etc.
+     *                         See Arbor API documenation for endpoint list.
+     * @param array  $filters  Search filters
+     * @param int    $perPage  Limit the number of returned objects per page, default 50
      *
-     * @return string returns a json string with the records from the API
+     * @return array returns an array with the records from the API
      */
-    public function findRest($endpoint, $filters = null, $perPage = 50)
+    public function findRest(string $endpoint, ?array $filters = null, int $perPage = 50)
     {
         $results = [];
 
@@ -457,9 +446,11 @@ class REST
     /**
      * Adds an error message to the error array.
      *
+     * @param string $msg
+     *
      * @return string the error message string
      */
-    private function addErrorMessage($msg)
+    private function addErrorMessage(string $msg)
     {
         $this->errorMessages[] = $msg;
     }
@@ -467,13 +458,13 @@ class REST
     /**
      * Makes a connection to the Arbor API platform using HTTP Component.
      *
-     * @param string $type    Request type, POST, PATCH, GET
+     * @param string $method  Request method, POST, PATCH, GET
      * @param string $url     URL to make the request against
-     * @param array  $options HTTP Client component options array
+     * @param array  $options HTTP Client component options
      *
-     * @return object The HTTP Client Response Object
+     * @return object|null the HTTP Client Response Object, null on error
      */
-    private function connect($type, $url, $options = [])
+    private function connect(string $method, string $url, array $options = [])
     {
         $options['headers'] =
             [
@@ -482,7 +473,7 @@ class REST
             ];
 
         try {
-            $response = $this->client->request($type, $url, $options);
+            $response = $this->client->request($method, $url, $options);
         } catch (DecodingExceptionInterface | TransportExceptionInterface $e) {
             $this->hasError = true;
             $this->addErrorMessage($e->getMessage());
@@ -498,7 +489,7 @@ class REST
      *
      * @param object $response a Valid HTTP Client reponse object
      *
-     * @return array the response from the server as an array
+     * @return array|null The response from the server as an array. Null if error.
      */
     private function getResult($response)
     {
@@ -550,9 +541,9 @@ class REST
      * @param string $url  URL to make the request against
      * @param array  $args Optional query arguments to append to the URL
      *
-     * @return array the output of the API call, null otherwise
+     * @return array|null the output of the API call, null otherwise
      */
-    private function doGetRequest($url, $args = null)
+    private function doGetRequest(string $url, ?array $args = null)
     {
         $this->hasError = false;
         $this->errorMessages = [];
@@ -587,12 +578,13 @@ class REST
     /**
      * Perform multiple requests against the Arbor REST API.
      *
-     * @param string $endpoint endpoint to query against, see Arbor REST API documentation
-     * @param int    $perPage  Total number of objects per page. (Default 50)
+     * @param string     $endpoint endpoint to query against, see Arbor REST API documentation
+     * @param array|null $filters
+     * @param int        $perPage  Total number of objects per page. (Default 50)
      *
-     * @return array the output of the API call, null otherwise
+     * @return array|null the output of the API call, null otherwise
      */
-    private function doMultiGetRequest($endpoint, $filters = null, $perPage = 50)
+    private function doMultiGetRequest(string $endpoint, ?array $filters = null, int $perPage = 50)
     {
         $this->hasError = false;
         $this->errorMessages = [];
@@ -686,9 +678,9 @@ class REST
      * @param string $type     Type of post request, PATCH, POST
      * @param string $postData json data to send with the post request
      *
-     * @return array the output of the API call, null otherwise
+     * @return array|null the output of the API call, null otherwise
      */
-    private function doPostRequest($url, $type = 'POST', $postData = null)
+    private function doPostRequest(string $url, string $type = 'POST', string $postData = null)
     {
         $this->hasError = false;
         $this->errorMessages = [];
@@ -700,6 +692,13 @@ class REST
         return $this->getResult($this->connect($type, $url, $options));
     }
 
+    /**
+     * Converts a search filter into a valid url encoded search string.
+     *
+     * @param mixed $search
+     *
+     * @return string Encoded URL string
+     */
     private function searchFilterToUrl($search)
     {
         $searchUrl = [];
@@ -715,7 +714,14 @@ class REST
         return urlencode($search);
     }
 
-    private function filterToUrl($filters)
+    /**
+     * Converts a filter into a valid URL.
+     *
+     * @param array $filters
+     *
+     * @return string Encoded URL string
+     */
+    private function filterToUrl(array $filters)
     {
         if (isset($filters['type'])) {
             return 'filter='.$filters['type'].'/'.$filters['field'].'.'.$filters['operator'].'.'.$this->searchFilterToUrl($filters['search']);
@@ -741,7 +747,7 @@ class REST
      *
      * @param array $errors an array of errors returned by the API
      */
-    private function findError($errors)
+    private function findError(array $errors)
     {
         foreach ($errors as $error) {
             if (isset($error['id'])) {
@@ -762,12 +768,12 @@ class REST
     /**
      * Get the cache Key.
      *
-     * @param string      $url  URL to make the request against
-     * @param string|null $args URL args
+     * @param string     $url  URL to make the request against
+     * @param array|null $args URL args
      *
      * @return string cache key
      */
-    private function getCacheKey($url, $args = null)
+    private function getCacheKey(string $url, ?array $args = null)
     {
         if (null === $args) {
             return 'arbor_rest_'.sha1($url);

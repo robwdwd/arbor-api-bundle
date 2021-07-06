@@ -28,8 +28,10 @@ class SOAP extends API
     private $cacheTtl;
 
     /**
-     * @param string $hostname  Hostname of the Arbor SP Leader
-     * @param string $restToken REST API Key
+     * @param string         $hostname  Hostname of the Arbor SP Leader
+     * @param string         $restToken REST API Key
+     * @param CacheInterface $cache
+     * @param array          $config
      */
     public function __construct(CacheInterface $cache, array $config)
     {
@@ -205,8 +207,6 @@ class SOAP extends API
 
     /**
      * Connect to the Arbor Sightline SOAP API.
-     *
-     * @return null
      */
     public function connect()
     {

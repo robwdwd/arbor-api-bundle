@@ -32,8 +32,11 @@ class WS extends API
     private $cache;
 
     /**
-     * @param string $hostname Hostname of the Arbor SP Leader
-     * @param string $wsKey    Web Services API Key
+     * @param string              $hostname Hostname of the Arbor SP Leader
+     * @param string              $wsKey    Web Services API Key
+     * @param HttpClientInterface $client
+     * @param CacheInterface      $cache
+     * @param array               $config
      */
     public function __construct(HttpClientInterface $client, CacheInterface $cache, array $config)
     {

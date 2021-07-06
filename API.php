@@ -13,6 +13,8 @@ namespace Robwdwd\ArborApiBundle;
 /**
  * Base API class for the ArborWS and ArborSOAP APIs.
  *
+ * @abstract
+ *
  * @author Rob Woodward <rob@emailplus.org>
  */
 abstract class API
@@ -65,7 +67,7 @@ abstract class API
     /**
      * Get ASN traffic graph traffic graph from Arbor Sightline.
      *
-     * @param int    $ASnum     AS number
+     * @param int    $ASN       AS number
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
      *
@@ -86,7 +88,7 @@ abstract class API
     /**
      * Get ASN traffic stats from Arbor Sightline.
      *
-     * @param int    $ASnum     AS number
+     * @param int    $ASN       AS number
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
      *
@@ -288,11 +290,11 @@ abstract class API
      * @param string $yLabel label for the Y-Axis on the graph
      * @param bool   $detail sets the graph to be a detail graph type when true
      * @param int    $width  graph width
-     * @param int    $width  graph height
+     * @param int    $height graph height
      *
      * @return string returns a XML string used to configure the graph returned by the WS API
      */
-    public function buildGraphXML(string $title, string $yLabel, $detail = false, $width = 986, $height = 180)
+    public function buildGraphXML(string $title, string $yLabel, $detail = false, int $width = 986, int $height = 180)
     {
         $graphXML = $this->getBaseXML();
         $baseNode = $graphXML->firstChild;
@@ -312,6 +314,36 @@ abstract class API
         }
 
         return $graphXML->saveXML();
+    }
+
+    /**
+     * Turn the cache on or off.
+     *
+     * @param bool $cacheOn Cache or not
+     */
+    public function shouldCache(bool $cacheOn)
+    {
+        $this->shouldCache = $cacheOn;
+    }
+
+    /**
+     * Gets the current error state.
+     *
+     * @return bool true if there is a current error, false otherwise
+     */
+    public function hasError()
+    {
+        return $this->hasError;
+    }
+
+    /**
+     * Gets the current error message string.
+     *
+     * @return string the error message string
+     */
+    public function errorMessage()
+    {
+        return $this->errorMessage;
     }
 
     /**
@@ -362,35 +394,5 @@ abstract class API
         }
 
         return $filterNode;
-    }
-
-    /**
-     * Turn the cache on or off.
-     *
-     * @param bool $cacheOn Cache or not
-     */
-    public function shouldCache(bool $cacheOn)
-    {
-        $this->shouldCache = $cacheOn;
-    }
-
-    /**
-     * Gets the current error state.
-     *
-     * @return bool true if there is a current error, false otherwise
-     */
-    public function hasError()
-    {
-        return $this->hasError;
-    }
-
-    /**
-     * Gets the current error message string.
-     *
-     * @return string the error message string
-     */
-    public function errorMessage()
-    {
-        return $this->errorMessage;
     }
 }
