@@ -70,7 +70,7 @@ class REST
      *
      * @param string $name            Name of the managed object to create
      * @param string $family          Managed object family: peer, profile or customer
-     * @param string $tags            Tags to add the the managed object
+     * @param array  $tags            Tags to add the the managed object
      * @param string $matchType       What type this match is, cidr_blocks for example
      * @param string $match           What to match against
      * @param array  $relationships   Relationships to this managed object. See Arbor SDK Docs.
@@ -78,7 +78,7 @@ class REST
      *
      * @return array|null the output of the API call, null otherwise
      */
-    public function createManagedObject(string $name, string $family, string $tags, string $matchType, string $match, ?array $relationships = null, ?array $extraAttributes = null)
+    public function createManagedObject(string $name, string $family, array $tags, string $matchType, string $match, ?array $relationships = null, ?array $extraAttributes = null)
     {
         $url = $this->url.'/managed_objects/';
 
