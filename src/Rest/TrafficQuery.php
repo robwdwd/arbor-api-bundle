@@ -58,8 +58,8 @@ class TrafficQuery extends REST
         $url = $this->url.'/traffic_queries/';
 
         $filters = [
-            ['facet' => 'Interface', 'value' => [$interfaceId], 'groupby' => false],
-            ['facet' => 'AS_Origin', 'value' => [], 'groupby' => true],
+            ['facet' => 'Interface', 'values' => [$interfaceId], 'groupby' => false],
+            ['facet' => 'AS_Origin', 'values' => [], 'groupby' => true],
         ];
 
         $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
@@ -81,7 +81,7 @@ class TrafficQuery extends REST
         $url = $this->url.'/traffic_queries/';
 
         $filters = [
-            ['facet' => 'AS_Path', 'value' => ['_'.$asn.'_'], 'groupby' => true],
+            ['facet' => 'AS_Path', 'values' => ['_'.$asn.'_'], 'groupby' => true],
         ];
 
         $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
