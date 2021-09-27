@@ -27,7 +27,7 @@ class TrafficQuery extends REST
      * @param string $startDate  Start date for the graph
      * @param string $endDate    End date for the graph
      *
-     * @return array returns traffic data
+     * @return array Traffic Data
      */
     public function getASNIntfTraffic(int $asn, array $interfaces, string $startDate = '7 days ago', string $endDate = 'now')
     {
@@ -39,27 +39,72 @@ class TrafficQuery extends REST
             ['facet' => 'AS_Path', 'values' => ['_'.$asn.'_'], 'groupby' => false],
         ];
 
-        $queryJson = $this->buildJson($filters, $startDate, $endDate);
+        $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
 
-        // Send the API request.
-        //
         return $this->doPostRequest($url, 'POST', $queryJson);
     }
 
-    private function buildJson($filters, $start, $end, string $unit = 'bps', $limit = 100, array $trafficClasses = ['in', 'out'])
+    /**
+     * Get interface traffic stats broken down by ASN from arbor Sightline.
+     *
+     * @param int    $interfaceId Interface IDs to filter on
+     * @param string $startDate   Start date for the graph
+     * @param string $endDate     End date for the graph
+     *
+     * @return SimpleXMLElement returns traffic data XML
+     */
+    public function getIntfAsnTraffic(int $interfaceId, string $startDate = '7 days ago', string $endDate = 'now')
+    {
+        $url = $this->url.'/traffic_queries/';
+
+        $filters = [
+            ['facet' => 'Interface', 'value' => [$interfaceId], 'groupby' => false],
+            ['facet' => 'AS_Origin', 'value' => [], 'groupby' => true],
+        ];
+
+        $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
+
+        return $this->doPostRequest($url, 'POST', $queryJson);
+    }
+
+    /**
+     * Get ASN traffic stats from Arbor Sightline.
+     *
+     * @param int    $asn       AS number
+     * @param string $startDate Start date for the graph
+     * @param string $endDate   End date for the graph
+     *
+     * @return array Traffic data
+     */
+    public function getASNTraffic(int $asn, string $startDate = '7 days ago', string $endDate = 'now')
+    {
+        $url = $this->url.'/traffic_queries/';
+
+        $filters = [
+            ['facet' => 'AS_Path', 'value' => ['_'.$asn.'_'], 'groupby' => true],
+        ];
+
+        $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
+
+        return $this->doPostRequest($url, 'POST', $queryJson);
+    }
+
+    public function buildTrafficQueryJson($filters, $start, $end, string $unit = 'bps', $limit = 100, array $trafficClasses = ['in', 'out'])
     {
         $start = new \Datetime($start);
         $end = new \Datetime($end);
 
-        $query = ['data' => ['attributes' => [
-            'query_start_time' => $start->format('c'),
-            'query_end_time' => $end->format('c'),
-            'unit' => $unit,
-            'limit' => $limit,
-            'traffic_classes' => $trafficClasses,
-            'filters' => $filters,
-        ],
-        ],
+        $query = [
+            'data' => [
+                'attributes' => [
+                    'query_start_time' => $start->format('c'),
+                    'query_end_time' => $end->format('c'),
+                    'unit' => $unit,
+                    'limit' => $limit,
+                    'traffic_classes' => $trafficClasses,
+                    'filters' => $filters,
+                ],
+            ],
         ];
 
         return json_encode($query);
