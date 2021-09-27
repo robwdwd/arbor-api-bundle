@@ -1,9 +1,6 @@
 <?php
 
-$finder = PhpCsFixer\Finder::create()
-    ->exclude('vendor')
-    ->in(__DIR__)
-;
+$finder = PhpCsFixer\Finder::create()->in(__DIR__.'/src');
 
 $config = new PhpCsFixer\Config();
 
@@ -11,6 +8,7 @@ return $config->setRules([
     '@PSR2' => true,
     '@PSR12' => true,
     '@Symfony' => true,
+    '@DoctrineAnnotation' => true,
     'array_indentation' => true,
     'array_syntax' => ['syntax' => 'short'],
     'method_argument_space' => ['on_multiline' => 'ensure_single_line'],

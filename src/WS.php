@@ -174,7 +174,7 @@ class WS extends API
         try {
             $response = $this->client->request('GET', $url, ['query' => $args]);
             $content = $response->getContent();
-        } catch (HttpExceptionInterface | DecodingExceptionInterface | TransportExceptionInterface $e) {
+        } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
             $this->hasError = true;
             $this->errorMessage = $e->getMessage();
 

@@ -474,7 +474,7 @@ class REST
 
         try {
             $response = $this->client->request($method, $url, $options);
-        } catch (DecodingExceptionInterface | TransportExceptionInterface $e) {
+        } catch (DecodingExceptionInterface|TransportExceptionInterface $e) {
             $this->hasError = true;
             $this->addErrorMessage($e->getMessage());
 
@@ -502,7 +502,7 @@ class REST
         // Get the content.
         try {
             $apiResult = $response->toArray(false);
-        } catch (HttpExceptionInterface | DecodingExceptionInterface | TransportExceptionInterface $e) {
+        } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
             $this->hasError = true;
             $this->addErrorMessage($e->getMessage());
 

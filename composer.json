@@ -23,18 +23,18 @@
     }],
     "autoload": {
         "psr-4": {
-            "Robwdwd\\ArborApiBundle\\": ""
+            "Robwdwd\\ArborApiBundle\\": "src/"
         }
     },
     "require": {
         "php": "^7.2",
         "ext-dom": "*",
         "ext-soap": "*",
-        "symfony/config": "^4.4 || ^5.0 || ^5.1 || ^5.2",
-        "symfony/cache": "^4.4 || ^5.0 || ^5.1 || ^5.2",
-        "symfony/dependency-injection": "^4.4 || ^5.0 || ^5.1 || ^5.2",
-        "symfony/framework-bundle": "^4.4 || ^5.0 || ^5.1 || ^5.2",
-        "symfony/http-client": "^4.4 || ^5.0 || ^5.1 || ^5.2"
+        "symfony/config": "^5.2 || ^5.3",
+        "symfony/cache": "^5.2 || ^5.3",
+        "symfony/dependency-injection": "^5.2 || ^5.3",
+        "symfony/framework-bundle": "^5.2 || ^5.3",
+        "symfony/http-client": "^5.2 || ^5.3"
     },
     "extra": {
         "branch-alias": {
