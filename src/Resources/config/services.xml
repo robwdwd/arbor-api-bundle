@@ -26,11 +26,16 @@
       <argument type="service" id="http_client"/>
       <argument type="service" id="cache.app"/>
     </service>
+    <service id="robwdwd_arbor_api.rest.traffic_query" class="Robwdwd\ArborApiBundle\Rest\TrafficQuery" public="true">
+      <argument type="service" id="http_client"/>
+      <argument type="service" id="cache.app"/>
+    </service>
     <service id="Robwdwd\ArborApiBundle\WS" alias="robwdwd_arbor_api.ws"/>
     <service id="Robwdwd\ArborApiBundle\SOAP" alias="robwdwd_arbor_api.soap"/>
     <service id="Robwdwd\ArborApiBundle\Rest\REST" alias="robwdwd_arbor_api.rest.rest"/>
     <service id="Robwdwd\ArborApiBundle\Rest\ManagedObject" alias="robwdwd_arbor_api.rest.managed_object"/>
     <service id="Robwdwd\ArborApiBundle\Rest\MitigationTemplate" alias="robwdwd_arbor_api.rest.mitigation_template"/>
     <service id="Robwdwd\ArborApiBundle\Rest\NotificationGroup" alias="robwdwd_arbor_api.rest.notification_group"/>
+    <service id="Robwdwd\ArborApiBundle\Rest\TrafficQuery" alias="robwdwd_arbor_api.rest.traffic_query"/>
   </services>
 </container>

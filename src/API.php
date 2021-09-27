@@ -172,7 +172,7 @@ abstract class API
         sort($interfaceIds, SORT_NUMERIC);
         $filters = [
             ['type' => 'interface', 'value' => $interfaceIds, 'binby' => true],
-            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => true],
+            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => false],
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);

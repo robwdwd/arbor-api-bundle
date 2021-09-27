@@ -28,10 +28,22 @@ class ArborApiExtension extends Extension
         $definitionWS = $container->getDefinition('robwdwd_arbor_api.ws');
         $definitionWS->setArgument(2, $config);
 
-        $definitionRS = $container->getDefinition('robwdwd_arbor_api.rest');
-        $definitionRS->setArgument(2, $config);
-
         $definitionSOAP = $container->getDefinition('robwdwd_arbor_api.soap');
         $definitionSOAP->setArgument(1, $config);
+
+        $definitionRS = $container->getDefinition('robwdwd_arbor_api.rest.rest');
+        $definitionRS->setArgument(2, $config);
+
+        $definitionRSMO = $container->getDefinition('robwdwd_arbor_api.rest.managed_object');
+        $definitionRSMO->setArgument(2, $config);
+
+        $definitionRSMT = $container->getDefinition('robwdwd_arbor_api.rest.mitigation_template');
+        $definitionRSMT->setArgument(2, $config);
+
+        $definitionRSNG = $container->getDefinition('robwdwd_arbor_api.rest.notification_group');
+        $definitionRSNG->setArgument(2, $config);
+
+        $definitionRSTQ = $container->getDefinition('robwdwd_arbor_api.rest.traffic_query');
+        $definitionRSTQ->setArgument(2, $config);
     }
 }

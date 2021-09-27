@@ -23,16 +23,19 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 class REST
 {
-    private $url;
+    protected $url;
+    protected $client;
+    protected $cache;
+
     private $restToken;
-    private $client;
-    private $cache;
 
     private $shouldCache;
     private $cacheTtl;
 
     private $hasError = false;
     private $errorMessages = [];
+
+    protected $cacheKeyPrefix = 'arbor_rest';
 
     /**
      * Contructor.
@@ -135,7 +138,7 @@ class REST
      *
      * @return string the error message string
      */
-    private function addErrorMessage(string $msg)
+    protected function addErrorMessage(string $msg)
     {
         $this->errorMessages[] = $msg;
     }
@@ -228,7 +231,7 @@ class REST
      *
      * @return array|null the output of the API call, null otherwise
      */
-    private function doGetRequest(string $url, ?array $args = null)
+    protected function doGetRequest(string $url, ?array $args = null)
     {
         $this->hasError = false;
         $this->errorMessages = [];
@@ -269,7 +272,7 @@ class REST
      *
      * @return array|null the output of the API call, null otherwise
      */
-    private function doMultiGetRequest(string $endpoint, ?array $filters = null, int $perPage = 50)
+    protected function doMultiGetRequest(string $endpoint, ?array $filters = null, int $perPage = 50)
     {
         $this->hasError = false;
         $this->errorMessages = [];
@@ -365,7 +368,7 @@ class REST
      *
      * @return array|null the output of the API call, null otherwise
      */
-    private function doPostRequest(string $url, string $type = 'POST', string $postData = null)
+    protected function doPostRequest(string $url, string $type = 'POST', string $postData = null)
     {
         $this->hasError = false;
         $this->errorMessages = [];
@@ -461,9 +464,9 @@ class REST
     private function getCacheKey(string $url, ?array $args = null)
     {
         if (null === $args) {
-            return 'arbor_rest_'.sha1($url);
+            return $this->cacheKeyPrefix.'_'.sha1($url);
         }
 
-        return 'arbor_rest_'.sha1($url.http_build_query($args));
+        return $this->cacheKeyPrefix.'_'.sha1($url.http_build_query($args));
     }
 }

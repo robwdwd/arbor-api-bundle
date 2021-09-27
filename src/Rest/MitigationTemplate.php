@@ -17,6 +17,8 @@ namespace Robwdwd\ArborApiBundle\Rest;
  */
 class MitigationTemplate extends REST
 {
+    protected $cacheKeyPrefix = 'arbor_rest_mt';
+
     /**
      * Gets multiple mitigation templates with optional filters (See Arbor API Documents).
      *
@@ -43,7 +45,7 @@ class MitigationTemplate extends REST
     {
         $existingTemplate = $this->getByID('mitigation_templates', $templateID);
 
-        if ($this->hasError) {
+        if ($this->hasError()) {
             return;
         }
 

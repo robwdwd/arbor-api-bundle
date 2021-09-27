@@ -17,6 +17,8 @@ namespace Robwdwd\ArborApiBundle\Rest;
  */
 class NotificationGroup extends REST
 {
+    protected $cacheKeyPrefix = 'arbor_rest_ng';
+
     /**
      * Gets multiple notification Groups with optional search.
      *
