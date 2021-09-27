@@ -2,20 +2,35 @@
 <container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services
         http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-    <services>
-        <service id="robwdwd_arbor_api.ws" class="Robwdwd\ArborApiBundle\WS" public="true">
-            <argument type="service" id="http_client"/>
-            <argument type="service" id="cache.app"/>
-        </service>
-        <service id="robwdwd_arbor_api.soap" class="Robwdwd\ArborApiBundle\SOAP" public="true">
-            <argument type="service" id="cache.app"/>
-        </service>
-        <service id="robwdwd_arbor_api.rest" class="Robwdwd\ArborApiBundle\REST" public="true">
-            <argument type="service" id="http_client"/>
-            <argument type="service" id="cache.app"/>
-        </service>
-        <service id="Robwdwd\ArborApiBundle\WS" alias="robwdwd_arbor_api.ws"/>
-        <service id="Robwdwd\ArborApiBundle\SOAP" alias="robwdwd_arbor_api.soap"/>
-        <service id="Robwdwd\ArborApiBundle\REST" alias="robwdwd_arbor_api.rest"/>
-    </services>
+  <services>
+    <service id="robwdwd_arbor_api.ws" class="Robwdwd\ArborApiBundle\WS" public="true">
+      <argument type="service" id="http_client"/>
+      <argument type="service" id="cache.app"/>
+    </service>
+    <service id="robwdwd_arbor_api.soap" class="Robwdwd\ArborApiBundle\SOAP" public="true">
+      <argument type="service" id="cache.app"/>
+    </service>
+    <service id="robwdwd_arbor_api.rest.rest" class="Robwdwd\ArborApiBundle\Rest\REST" public="true">
+      <argument type="service" id="http_client"/>
+      <argument type="service" id="cache.app"/>
+    </service>
+    <service id="robwdwd_arbor_api.rest.managed_object" class="Robwdwd\ArborApiBundle\Rest\ManagedObject" public="true">
+      <argument type="service" id="http_client"/>
+      <argument type="service" id="cache.app"/>
+    </service>
+    <service id="robwdwd_arbor_api.rest.mitigation_template" class="Robwdwd\ArborApiBundle\Rest\MitigationTemplate" public="true">
+      <argument type="service" id="http_client"/>
+      <argument type="service" id="cache.app"/>
+    </service>
+    <service id="robwdwd_arbor_api.rest.notification_group" class="Robwdwd\ArborApiBundle\Rest\NotificationGroup" public="true">
+      <argument type="service" id="http_client"/>
+      <argument type="service" id="cache.app"/>
+    </service>
+    <service id="Robwdwd\ArborApiBundle\WS" alias="robwdwd_arbor_api.ws"/>
+    <service id="Robwdwd\ArborApiBundle\SOAP" alias="robwdwd_arbor_api.soap"/>
+    <service id="Robwdwd\ArborApiBundle\Rest\REST" alias="robwdwd_arbor_api.rest.rest"/>
+    <service id="Robwdwd\ArborApiBundle\Rest\ManagedObject" alias="robwdwd_arbor_api.rest.managed_object"/>
+    <service id="Robwdwd\ArborApiBundle\Rest\MitigationTemplate" alias="robwdwd_arbor_api.rest.mitigation_template"/>
+    <service id="Robwdwd\ArborApiBundle\Rest\NotificationGroup" alias="robwdwd_arbor_api.rest.notification_group"/>
+  </services>
 </container>
