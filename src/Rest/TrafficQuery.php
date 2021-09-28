@@ -41,7 +41,7 @@ class TrafficQuery extends REST
 
         $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
 
-        return $this->doPostRequest($url, 'POST', $queryJson);
+        return $this->doCachedPostRequest($url, 'POST', $queryJson);
     }
 
     /**
@@ -64,7 +64,7 @@ class TrafficQuery extends REST
 
         $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
 
-        return $this->doPostRequest($url, 'POST', $queryJson);
+        return $this->doCachedPostRequest($url, 'POST', $queryJson);
     }
 
     /**
@@ -86,7 +86,7 @@ class TrafficQuery extends REST
 
         $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
 
-        return $this->doPostRequest($url, 'POST', $queryJson);
+        return $this->doCachedPostRequest($url, 'POST', $queryJson);
     }
 
     public function buildTrafficQueryJson($filters, $start, $end, string $unit = 'bps', $limit = 100, array $trafficClasses = ['in', 'out'])

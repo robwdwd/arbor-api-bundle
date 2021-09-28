@@ -141,8 +141,13 @@ abstract class API
      *
      * @return string returns a PNG image
      */
-    public function getASNIntfTrafficGraph(int $asNum, array $interfaceIds, string $title, string $startDate = '7 days ago', string $endDate = 'now')
-    {
+    public function getASNIntfTrafficGraph(
+        int $asNum,
+        array $interfaceIds,
+        string $title,
+        string $startDate = '7 days ago',
+        string $endDate = 'now'
+    ) {
         sort($interfaceIds, SORT_NUMERIC);
 
         $filters = [

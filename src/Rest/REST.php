@@ -368,6 +368,41 @@ class REST
      *
      * @return array|null the output of the API call, null otherwise
      */
+    protected function doCachedPostRequest(string $url, string $type = 'POST', string $postData = null)
+    {
+        $this->hasError = false;
+        $this->errorMessages = [];
+
+        if (true === $this->shouldCache) {
+            $cachedItem = $this->cache->getItem($this->getPostCacheKey($url, $type, $postData));
+
+            if ($cachedItem->isHit()) {
+                return $cachedItem->get();
+            }
+        }
+
+        $result = $this->doPostRequest($url, $type, $postData);
+
+        // If there is a result, store in cache
+        //
+        if (null !== $result && true === $this->shouldCache) {
+            $cachedItem->expiresAfter($this->cacheTtl);
+            $cachedItem->set($result);
+            $this->cache->save($cachedItem);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Perform a Curl request against the API.
+     *
+     * @param string $url      URL to make the request against
+     * @param string $type     Type of post request, PATCH, POST
+     * @param string $postData json data to send with the post request
+     *
+     * @return array|null the output of the API call, null otherwise
+     */
     protected function doPostRequest(string $url, string $type = 'POST', string $postData = null)
     {
         $this->hasError = false;
@@ -468,5 +503,19 @@ class REST
         }
 
         return $this->cacheKeyPrefix.'_'.sha1($url.http_build_query($args));
+    }
+
+    /**
+     * Get the cache Key.
+     *
+     * @param string $url      URL to make the request against
+     * @param string $type
+     * @param mixed  $postData
+     *
+     * @return string cache key
+     */
+    private function getPostCacheKey(string $url, string $type, mixed $postData)
+    {
+        return $this->cacheKeyPrefix.'_'.sha1($url.$type.$postData);
     }
 }
