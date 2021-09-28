@@ -26,17 +26,18 @@ class TrafficQuery extends REST
      * @param array  $interfaces Array of interface IDs to filter on
      * @param string $startDate  Start date for the graph
      * @param string $endDate    End date for the graph
+     * @param string $asPath
      *
      * @return array Traffic Data
      */
-    public function getASNIntfTraffic(int $asn, array $interfaces, string $startDate = '7 days ago', string $endDate = 'now')
+    public function getInterfaceAsPathTraffic(string $asPath, array $interfaces, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $url = $this->url.'/traffic_queries/';
 
         sort($interfaces, SORT_NUMERIC);
         $filters = [
             ['facet' => 'Interface', 'values' => $interfaces, 'groupby' => true],
-            ['facet' => 'AS_Path', 'values' => ['_'.$asn.'_'], 'groupby' => false],
+            ['facet' => 'AS_Path', 'values' => [$asPath], 'groupby' => true],
         ];
 
         $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
@@ -73,15 +74,16 @@ class TrafficQuery extends REST
      * @param int    $asn       AS number
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
+     * @param string $asPath
      *
      * @return array Traffic data
      */
-    public function getASNTraffic(int $asn, string $startDate = '7 days ago', string $endDate = 'now')
+    public function getAsPathTraffic(string $asPath, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $url = $this->url.'/traffic_queries/';
 
         $filters = [
-            ['facet' => 'AS_Path', 'values' => ['_'.$asn.'_'], 'groupby' => true],
+            ['facet' => 'AS_Path', 'values' => [$asPath], 'groupby' => true],
         ];
 
         $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
@@ -93,6 +95,10 @@ class TrafficQuery extends REST
     {
         $start = new \Datetime($start);
         $end = new \Datetime($end);
+
+        // Round down to the nearest hour.
+        $start->setTime($start->format('H'), 0);
+        $end->setTime($end->format('H'), 0);
 
         $query = [
             'data' => [

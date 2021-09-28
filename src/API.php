@@ -70,16 +70,16 @@ abstract class API
     /**
      * Get ASN traffic graph traffic graph from Arbor Sightline.
      *
-     * @param int    $asNum     AS number
+     * @param string $asPath    AS Patch match string
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
      *
      * @return string returns a PNG image
      */
-    public function getASNTrafficGraph(int $asNum, string $startDate = '7 days ago', string $endDate = 'now')
+    public function getAsPathTrafficGraph(string $asPath, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $filters = [
-            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => true],
+            ['type' => 'aspath', 'value' => $asPath, 'binby' => true],
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);
@@ -91,16 +91,16 @@ abstract class API
     /**
      * Get ASN traffic stats from Arbor Sightline.
      *
-     * @param int    $asNum     AS number
+     * @param string $asPath    AS path string
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
      *
      * @return SimpleXMLElement Traffic data XML
      */
-    public function getASNTrafficXML(int $asNum, string $startDate = '7 days ago', string $endDate = 'now')
+    public function getAsPathTrafficXML(string $asPath, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $filters = [
-            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => true],
+            ['type' => 'aspath', 'value' => $asPath, 'binby' => true],
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);
@@ -133,7 +133,7 @@ abstract class API
     /**
      * Get ASN traffic graph broken down by interface from Arbor Sightline.
      *
-     * @param int    $asNum        AS number
+     * @param string $asPath       AS Path string
      * @param array  $interfaceIds Array of interface IDs to filter on
      * @param string $title        Title of the graph
      * @param string $startDate    Start date for the graph
@@ -141,8 +141,8 @@ abstract class API
      *
      * @return string returns a PNG image
      */
-    public function getASNIntfTrafficGraph(
-        int $asNum,
+    public function getInterfaceAsPathTrafficGraph(
+        string $asPath,
         array $interfaceIds,
         string $title,
         string $startDate = '7 days ago',
@@ -152,7 +152,7 @@ abstract class API
 
         $filters = [
             ['type' => 'interface', 'value' => $interfaceIds, 'binby' => true],
-            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => false],
+            ['type' => 'aspath', 'value' => $asPath, 'binby' => true],
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);
@@ -165,19 +165,19 @@ abstract class API
     /**
      * Get ASN traffic stats broken down by interface from Arbor Sightline.
      *
-     * @param int    $asNum        AS number
+     * @param string $asPath       AS Path match string
      * @param array  $interfaceIds Array of interface IDs to filter on
      * @param string $startDate    Start date for the graph
      * @param string $endDate      End date for the graph
      *
      * @return SimpleXMLElement returns traffic data XML
      */
-    public function getASNIntfTrafficXML(int $asNum, array $interfaceIds, string $startDate = '7 days ago', string $endDate = 'now')
+    public function getInterfaceAsPathTrafficXML(string $asPath, array $interfaceIds, string $startDate = '7 days ago', string $endDate = 'now')
     {
         sort($interfaceIds, SORT_NUMERIC);
         $filters = [
             ['type' => 'interface', 'value' => $interfaceIds, 'binby' => true],
-            ['type' => 'aspath', 'value' => '_'.$asNum.'_', 'binby' => false],
+            ['type' => 'aspath', 'value' => $asPath, 'binby' => false],
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);

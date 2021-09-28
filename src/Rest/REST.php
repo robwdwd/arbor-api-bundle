@@ -514,7 +514,7 @@ class REST
      *
      * @return string cache key
      */
-    private function getPostCacheKey(string $url, string $type, mixed $postData)
+    private function getPostCacheKey(string $url, string $type, string $postData)
     {
         return $this->cacheKeyPrefix.'_'.sha1($url.$type.$postData);
     }
