@@ -83,7 +83,7 @@ abstract class API
         ];
 
         $queryXML = $this->buildQueryXML($filters, $startDate, $endDate);
-        $graphXML = $this->buildGraphXML('Traffic with AS'.$asNum, 'bps [+ to / - from ]', false, 986, 270);
+        $graphXML = $this->buildGraphXML('Traffic with AS'.$asPath, 'bps [+ to / - from ]', false, 986, 270);
 
         return $this->getTrafficGraph($queryXML, $graphXML);
     }
