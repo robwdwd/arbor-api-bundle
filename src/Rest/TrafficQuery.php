@@ -48,13 +48,13 @@ class TrafficQuery extends REST
     /**
      * Get interface traffic stats broken down by ASN from arbor Sightline.
      *
-     * @param int    $interfaceId Interface IDs to filter on
+     * @param string $interfaceId Interface IDs to filter on
      * @param string $startDate   Start date for the graph
      * @param string $endDate     End date for the graph
      *
      * @return SimpleXMLElement returns traffic data XML
      */
-    public function getIntfAsnTraffic(int $interfaceId, string $startDate = '7 days ago', string $endDate = 'now')
+    public function getInterfaceAsnTraffic(string $interfaceId, string $startDate = '7 days ago', string $endDate = 'now')
     {
         $url = $this->url.'/traffic_queries/';
 
