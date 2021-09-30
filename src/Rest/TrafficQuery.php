@@ -111,6 +111,28 @@ class TrafficQuery extends REST
         return $this->doCachedPostRequest($url, 'POST', $queryJson);
     }
 
+    /**
+     * Get interface traffic stats from Arbor Sightline.
+     *
+     * @param string $interfaceId      Interface ID
+     * @param string $startDate Start date for the graph
+     * @param string $endDate   End date for the graph
+     *
+     * @return array Traffic data
+     */
+    public function getInterfaceTraffic(string $interfaceId, string $startDate = '7 days ago', string $endDate = 'now')
+    {
+        $url = $this->url.'/traffic_queries/';
+
+        $filters = [
+            ['facet' => 'Interface', 'values' => [$interfaceId], 'groupby' => true],
+        ];
+
+        $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate, 'bps', 100, ['in', 'out', 'total', 'dropped']);
+
+        return $this->doCachedPostRequest($url, 'POST', $queryJson);
+    }
+
     public function buildTrafficQueryJson($filters, $start, $end, string $unit = 'bps', $limit = 100, array $trafficClasses = ['in', 'out'])
     {
         $start = new \Datetime($start);
