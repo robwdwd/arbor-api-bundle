@@ -20,13 +20,12 @@ class TrafficQuery extends REST
     protected $cacheKeyPrefix = 'arbor_rest_tquery';
 
     /**
-     * Get ASN traffic stats broken down by interface from Arbor Sightline.
+     * Get AS Path traffic stats broken down by interface from Arbor Sightline.
      *
-     * @param int    $asn        AS number
+     * @param string    $asPath        AS path match
      * @param array  $interfaces Array of interface IDs to filter on
      * @param string $startDate  Start date for the graph
      * @param string $endDate    End date for the graph
-     * @param string $asPath
      *
      * @return array Traffic Data
      */
@@ -46,13 +45,13 @@ class TrafficQuery extends REST
     }
 
     /**
-     * Get interface traffic stats broken down by ASN from arbor Sightline.
+     * Get interface traffic stats broken down by AS Origin from arbor Sightline.
      *
      * @param string $interfaceId Interface IDs to filter on
      * @param string $startDate   Start date for the graph
      * @param string $endDate     End date for the graph
      *
-     * @return SimpleXMLElement returns traffic data XML
+     * @return array Traffic data
      */
     public function getInterfaceAsnTraffic(string $interfaceId, string $startDate = '7 days ago', string $endDate = 'now')
     {
@@ -69,12 +68,11 @@ class TrafficQuery extends REST
     }
 
     /**
-     * Get ASN traffic stats from Arbor Sightline.
+     * Get AS Path traffic stats from Arbor Sightline.
      *
-     * @param int    $asn       AS number
+     * @param string    $asPath       AS Path match
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
-     * @param string $asPath
      *
      * @return array Traffic data
      */
@@ -87,6 +85,28 @@ class TrafficQuery extends REST
         ];
 
         $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate);
+
+        return $this->doCachedPostRequest($url, 'POST', $queryJson);
+    }
+
+    /**
+     * Get Peer managed object traffic stats from Arbor Sightline.
+     *
+     * @param string $peerId       Peer managed object ID
+     * @param string $startDate Start date for the graph
+     * @param string $endDate   End date for the graph
+     *
+     * @return array Traffic data
+     */
+    public function getPeerTraffic(string $peerId, string $startDate = '7 days ago', string $endDate = 'now')
+    {
+        $url = $this->url.'/traffic_queries/';
+
+        $filters = [
+            ['facet' => 'Peer', 'values' => [$peerId], 'groupby' => true],
+        ];
+
+        $queryJson = $this->buildTrafficQueryJson($filters, $startDate, $endDate, 'bps', 100, ['in', 'out', 'total']);
 
         return $this->doCachedPostRequest($url, 'POST', $queryJson);
     }
