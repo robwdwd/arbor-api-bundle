@@ -109,7 +109,6 @@ class ManagedObject extends REST
      */
     public function changeManagedObject(string $arborID, array $attributes, ?array $relationships = null)
     {
-        dump($this);
         $url = $this->url.'/managed_objects/'.$arborID;
 
         $moJson = [
