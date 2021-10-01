@@ -22,7 +22,7 @@ class TrafficQuery extends REST
     /**
      * Get AS Path traffic stats broken down by interface from Arbor Sightline.
      *
-     * @param string    $asPath        AS path match
+     * @param string $asPath     AS path match
      * @param array  $interfaces Array of interface IDs to filter on
      * @param string $startDate  Start date for the graph
      * @param string $endDate    End date for the graph
@@ -70,7 +70,7 @@ class TrafficQuery extends REST
     /**
      * Get AS Path traffic stats from Arbor Sightline.
      *
-     * @param string    $asPath       AS Path match
+     * @param string $asPath    AS Path match
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
      *
@@ -92,7 +92,7 @@ class TrafficQuery extends REST
     /**
      * Get Peer managed object traffic stats from Arbor Sightline.
      *
-     * @param string $peerId       Peer managed object ID
+     * @param string $peerId    Peer managed object ID
      * @param string $startDate Start date for the graph
      * @param string $endDate   End date for the graph
      *
@@ -114,9 +114,9 @@ class TrafficQuery extends REST
     /**
      * Get interface traffic stats from Arbor Sightline.
      *
-     * @param string $interfaceId      Interface ID
-     * @param string $startDate Start date for the graph
-     * @param string $endDate   End date for the graph
+     * @param string $interfaceId Interface ID
+     * @param string $startDate   Start date for the graph
+     * @param string $endDate     End date for the graph
      *
      * @return array Traffic data
      */

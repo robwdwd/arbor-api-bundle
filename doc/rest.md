@@ -3,6 +3,27 @@
 The rest API allows for access to Arbor REST API services. Documentation
 is avaiable from Arbor and from the Portal UI.
 
+## Error Checking
+
+The REST class uses the HTTP client to handle the error checking based
+on HTTP status code or a transport/network error but it also tries to
+find errors in the returned response from the Arbor API. If there is an
+error most functions will return null but you should specifically check
+for errors using `` `hasError() ``\` function. Error messages can be
+read using the `` `errorMessage() ``\` function which will return an
+array of all errors.
+
+```php
+// Check for errors.
+if ($arborRest->hasError()) {
+    foreach ($arborRest->errorMessage() as $error) {
+        $this->addFlash('error', $error);
+    }
+
+    return $this->redirectToRoute('peer_view', ['id' => $peer->getId()]);
+}
+```
+
 ## Getting Elements
 
 getByID gets an endpoint element from the Arbor Leader. See the arbor
@@ -11,9 +32,9 @@ documentation for a list of valid endpoints.
 The following example gets Managed object data for a peer.
 
 ```php
-use Robwdwd\ArborApiBundle\REST as ArborRest;
+use Robwdwd\ArborApiBundle\REST\Rest as ArborRest;
 
-public function show(Peer $peer, Request $request ArborRest $arborRest): Response
+public function show(Peer $peer, Request $request, ArborRest $arborRest): Response
 {
     if ($peer->getArborMoId()) {
         $arborMO = $arborRest->getByID('managed_objects', $peer->getArborMoId());
@@ -21,6 +42,68 @@ public function show(Peer $peer, Request $request ArborRest $arborRest): Respons
     }
 }
 ```
+
+## Endpoints
+
+Seperate classes are available for Managed Objects, Mitigation Templates,
+Notification groups and Traffic Queries.
+
+```php
+use Robwdwd\ArborApiBundle\Rest\ManagedObject;
+use Robwdwd\ArborApiBundle\Rest\MitigationTemplate;
+use Robwdwd\ArborApiBundle\Rest\NotificationGroup;
+use Robwdwd\ArborApiBundle\Rest\TrafficQuery;
+```
+
+## Traffic Queries
+
+Traffic queries were introduced in v9 of the arbor Siteline API. Various helper functions
+exist to allow for easy access to various traffic queries. getPeerTraffic(), getInterfaceTraffic(),
+getInterfaceAsnTraffic().
+
+Building a traffic query json to send to arbor REST API can be done with the following function.
+
+```php
+
+use Robwdwd\ArborApiBundle\Rest\TrafficQuery;
+
+// Get traffic for peer managed object.
+//
+$peerID = $peer->getPeerManagedObjectID();
+$result = $trafficQuery->getPeerTraffic($peerId, '7 days ago', 'now');
+
+// Find traffic for given interfaces and matching AS Path.
+//
+$interfaceIds = ["122334", "9292929", "2202092"]; // List of Arbor interface IDs
+$asPath = '_6768_';  // AS Path regular expression
+
+$trafficQuery->getInterfaceAsPathTraffic($asPath, $interfaceIds, '2 days ago', 'now')
+
+// Build query to get traffic on a given interface broken down by AS Origin.
+//
+$interfaceID = 1298278;
+$startDate = '1 week ago';
+$endDate = 'now';
+
+// Build filter, filters take exact same format as described in Arbor API documenation
+// facet = Filter Type, values is array of filter matches, and groupby groups data
+// by this filter.
+//
+$filters = [
+            ['facet' => 'Interface', 'values' => [$interfaceId], 'groupby' => false],
+            ['facet' => 'AS_Origin', 'values' => [], 'groupby' => true],
+        ];
+
+$query = $trafficQuery->buildTrafficQueryJson($filters, $startDate, $endDate);
+
+// Do the traffic query post request, this works with caching unlike doPostRequest
+// in the base REST class.
+//
+$result = $trafficQuery->doCachedPostRequest($url, 'POST', $queryJson);
+
+```
+
+## Managed Objects
 
 You can get multiple managed objects with the managed object helper
 function. This searches the Attributes of any returned managed object
@@ -36,11 +119,11 @@ a string.
 The following gets all peer managed objects retrieving 25 per page.
 
 ```php
-public function list(Request $request ArborRest $arborRest): Response
+public function list(Request $request ManagedObject $managedObject): Response
 {
     $filter = ['type' => 'a', 'operator' => 'eq', 'field' => 'family', 'search' => 'peer'];
 
-    $arborMOs = $arborRest->getManagedObjects($filter, 25);
+    $arborMOs = $managedObject->getManagedObjects($filter, 25);
     dump ($arborMOs);
 
 }
@@ -50,51 +133,16 @@ The following gets all managed objects matching SomeNetwork as the name
 (this would be just one).
 
 ```php
-public function list(Request $request ArborRest $arborRest): Response
+public function list(Request $request ManagedObject $managedObject): Response
 {
 
-    $arborMOs = $arborRest->getManagedObjects('name', 'SomeNetwork');
+    $arborMOs = $managedObject->getManagedObjects('name', 'SomeNetwork');
     dump ($arborMOs);
 
 }
 ```
 
-The following gets a notification group.
-
-```php
-public function list(Request $request ArborRest $arborRest): Response
-{
-
-    $ArborNG = $arborRest->getNotificationGroups('name', 'Group1');
-    dump ($ArborNG);
-
-}
-```
-
-### findRest()
-
-Most of the helper functions such as `` `getManagedObjects ``\` us the
-low level findRest function. This adds a wrapper around retrieving
-managed objects from the Arbor Leader which currently doesn't provide
-any useful filtering (with ArborSP 8.2).
-
-> `` `findRest($endpoint, $field = null, $search = null, $perPage = 50) ``\`
-
-The following retrieves all customer managed objects from the Arbor
-Leader.
-
-```php
-public function list(Request $request ArborRest $arborRest): Response
-{
-
-    $arborMOs = $arborRest->findRest('managed_objects', 'family', 'customer');
-    dump ($arborMOs);
-
-}
-```
-
-Updating a managed object
--------------------------
+### Updating a managed object
 
 Managed objects can be updated. You need to provide a
 `` `$attributes ``\` array which changes any attributes on an existing
@@ -103,7 +151,7 @@ specificys on what fields the attributes and relationships can have
 check the ArborREST documentation.
 
 ```php
-public function updateMo(Peer $peer, ArborRest $arborRest): Response
+public function updateMo(Peer $peer, ManagedObject $managedObject): Response
 {
     if ($peer->getArborMoId()) {
         $arborPeer = $peerRepository->getForArbor($peer->getId());
@@ -127,11 +175,11 @@ public function updateMo(Peer $peer, ArborRest $arborRest): Response
             ],
         ];
 
-        $output[] = $arborRest->changeManagedObject($peer->getArborMoId(), $attributes, $relationships);
+        $output[] = $managedObject->changeManagedObject($peer->getArborMoId(), $attributes, $relationships);
 
         // Check for errors.
-        if ($arborRest->hasError()) {
-            foreach ($arborRest->errorMessage() as $error) {
+        if ($managedObject->hasError()) {
+            foreach ($managedObject->errorMessage() as $error) {
                 $this->addFlash('error', $error);
             }
 
@@ -147,23 +195,56 @@ public function updateMo(Peer $peer, ArborRest $arborRest): Response
 }
 ```
 
-## Error Checking
+## Notification Groups
 
-The REST class uses the HTTP client to handle the error checking based
-on HTTP status code or a transport/network error but it also tries to
-find errors in the returned response from the Arbor API. If there is an
-error most functions will return null but you should specifically check
-for errors using `` `hasError() ``\` function. Error messages can be
-read using the `` `errorMessage() ``\` function which will return an
-array of all errors.
+The following gets a notification group.
 
 ```php
-// Check for errors.
-if ($arborRest->hasError()) {
-    foreach ($arborRest->errorMessage() as $error) {
-        $this->addFlash('error', $error);
-    }
+public function list(Request $request NotificationGroup $ng): Response
+{
 
-    return $this->redirectToRoute('peer_view', ['id' => $peer->getId()]);
+    $ArborNG = $ng->getNotificationGroups('name', 'Group1');
+    dump ($ArborNG);
+
+}
+```
+
+## Mitigation Templates
+
+Mitigation templates can be updated, changed and copied in the same way as managed objects.
+
+```php
+
+use Robwdwd\ArborApiBundle\Rest\MitigationTemplate;
+
+public function updateMo(Peer $peer, MitigationTemplate $mitigationTemplate): Response
+
+    $templateID = 1; // Template to copy from
+    $newName = 'Copied Template';
+    $newDescription = 'This is a template copy';
+
+    $mitigationTemplate->copyMitigationTemplate($templateID,  $newName, $newDescription);
+
+    // Check for errors.
+}
+```
+
+## findRest()
+
+Most of the helper functions such as `` `getManagedObjects ``\` us the
+low level findRest function.
+
+> `` `findRest($endpoint, $field = null, $search = null, $perPage = 50) ``\`
+
+The following retrieves all customer managed objects from the Arbor
+Leader.
+
+```php
+public function list(Request $request ArborRest $arborRest): Response
+{
+
+    $arborMOs = $arborRest->findRest('managed_objects', 'family', 'customer');
+    dump ($arborMOs);
+
 }
 ```

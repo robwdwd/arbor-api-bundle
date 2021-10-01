@@ -14,7 +14,7 @@ ArborAPI supports the following:
 - Support for Arbor Web services API as a service.
 - Support for Arbor SOAP API as a service.
 - Optional caching of Sightline responses.
-- Currently testing with Arbor SP 9.2 but should work with most 9.x versions and above.
+- Currently testing with Arbor SP 9.5 but should work with most 9.x versions and above.
 
 ## Requirements
 
