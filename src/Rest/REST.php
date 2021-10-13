@@ -473,6 +473,7 @@ class REST
     private function findError(array $errors)
     {
         foreach ($errors as $error) {
+
             if (isset($error['id'])) {
                 $this->errorMessages[] = $error['id']."\n ";
             }
@@ -483,7 +484,11 @@ class REST
                 $this->errorMessages[] = $error['title']."\n ";
             }
             if (isset($error['detail'])) {
-                $this->errorMessages[] = $error['detail']."\n ";
+                if (isset($error['source']['pointer'])) {
+                    $this->errorMessages[] = $error['detail'] . ' : ' . $error['source']['pointer']."\n ";
+                } else {
+                    $this->errorMessages[] = $error['detail']."\n ";
+                }
             }
         }
     }
