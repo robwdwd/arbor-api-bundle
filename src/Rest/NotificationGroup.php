@@ -50,7 +50,7 @@ class NotificationGroup extends REST
         $requiredAttributes = ['name' => $name];
 
         if (isset($emailAddresses)) {
-            $requiredAttributes['smtp_email_addresses'] = implode(',', $emailAddresses);
+            $requiredAttributes['smtp_email_addresses'] = implode(' ', $emailAddresses);
         }
 
         // Merge in extra attributes for this managed object
