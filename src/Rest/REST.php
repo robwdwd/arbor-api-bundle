@@ -74,18 +74,19 @@ class REST
      * Find or search Arbor SP REST API for a particular record or set of
      * records.
      *
-     * @param string $endpoint Endpoint type, Managed Object, Mitigations etc.
-     *                         See Arbor API documenation for endpoint list.
-     * @param array  $filters  Search filters
-     * @param int    $perPage  Limit the number of returned objects per page, default 50
+     * @param string $endpoint   Endpoint type, Managed Object, Mitigations etc.
+     *                           See Arbor API documenation for endpoint list.
+     * @param array  $filters    Search filters
+     * @param int    $perPage    Limit the number of returned objects per page, default 50
+     * @param bool   $commitFlag Add config=commited to endpoints which require it, default false
      *
      * @return array returns an array with the records from the API
      */
-    public function findRest(string $endpoint, ?array $filters = null, int $perPage = 50)
+    public function findRest(string $endpoint, ?array $filters = null, int $perPage = 50, $commitFlag = false)
     {
         $results = [];
 
-        $apiResult = $this->doMultiGetRequest($endpoint, $filters, $perPage);
+        $apiResult = $this->doMultiGetRequest($endpoint, $filters, $perPage, $commitFlag);
 
         if (!$apiResult) {
             return;
@@ -266,13 +267,14 @@ class REST
     /**
      * Perform multiple requests against the Arbor REST API.
      *
-     * @param string     $endpoint endpoint to query against, see Arbor REST API documentation
+     * @param string     $endpoint   endpoint to query against, see Arbor REST API documentation
      * @param array|null $filters
-     * @param int        $perPage  Total number of objects per page. (Default 50)
+     * @param int        $perPage    Total number of objects per page. (Default 50)
+     * @param bool       $commitFlag Add config=commited to endpoints which require it, default false
      *
      * @return array|null the output of the API call, null otherwise
      */
-    protected function doMultiGetRequest(string $endpoint, ?array $filters = null, int $perPage = 50)
+    protected function doMultiGetRequest(string $endpoint, ?array $filters = null, int $perPage = 50, $commitFlag = false)
     {
         $this->hasError = false;
         $this->errorMessages = [];
@@ -295,6 +297,10 @@ class REST
         }
 
         $args = ['perPage' => $perPage, 'page' => 1];
+
+        if (true === $commitFlag) {
+            $args['config'] = 'committed';
+        }
 
         $totalPages = 1;
 
@@ -473,7 +479,6 @@ class REST
     private function findError(array $errors)
     {
         foreach ($errors as $error) {
-
             if (isset($error['id'])) {
                 $this->errorMessages[] = $error['id']."\n ";
             }
@@ -485,7 +490,7 @@ class REST
             }
             if (isset($error['detail'])) {
                 if (isset($error['source']['pointer'])) {
-                    $this->errorMessages[] = $error['detail'] . ' : ' . $error['source']['pointer']."\n ";
+                    $this->errorMessages[] = $error['detail'].' : '.$error['source']['pointer']."\n ";
                 } else {
                     $this->errorMessages[] = $error['detail']."\n ";
                 }
