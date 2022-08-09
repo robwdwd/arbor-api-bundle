@@ -30,11 +30,11 @@
         "php": ">=7.2.5",
         "ext-dom": "*",
         "ext-soap": "*",
-        "symfony/config": "^5.2 || ^5.3",
-        "symfony/cache": "^5.2 || ^5.3",
-        "symfony/dependency-injection": "^5.2 || ^5.3",
-        "symfony/framework-bundle": "^5.2 || ^5.3",
-        "symfony/http-client": "^5.2 || ^5.3"
+        "symfony/config": "^5.2 || ^6.0 ||^6.1",
+        "symfony/cache": "^5.2 || ^6.0 ||^6.1",
+        "symfony/dependency-injection": "^5.2 || ^6.0 ||^6.1",
+        "symfony/framework-bundle": "^5.2 || ^6.0 ||^6.1",
+        "symfony/http-client": "^5.2 || ^6.0 ||^6.1"
     },
     "extra": {
         "branch-alias": {
