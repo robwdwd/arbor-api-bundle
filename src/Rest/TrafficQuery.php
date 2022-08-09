@@ -34,6 +34,10 @@ class TrafficQuery extends REST
         $url = $this->url.'/traffic_queries/';
 
         sort($interfaces, SORT_NUMERIC);
+        
+        // Make sure all the interfaces are string values
+        //
+        $interfaces = array_map('strval', $interfaces);
         $filters = [
             ['facet' => 'Interface', 'values' => $interfaces, 'groupby' => true],
             ['facet' => 'AS_Path', 'values' => [$asPath], 'groupby' => true],
