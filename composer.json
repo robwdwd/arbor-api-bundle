@@ -27,7 +27,7 @@
         }
     },
     "require": {
-        "php": "^7.2",
+        "php": ">=7.2.5",
         "ext-dom": "*",
         "ext-soap": "*",
         "symfony/config": "^5.2 || ^5.3",
