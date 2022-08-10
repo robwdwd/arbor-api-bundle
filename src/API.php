@@ -11,6 +11,7 @@
 namespace Robwdwd\ArborApiBundle;
 
 use DomDocument;
+use Robwdwd\ArborApiBundle\Exception\ArborApiException;
 use SimpleXMLElement;
 
 /**
@@ -22,8 +23,6 @@ use SimpleXMLElement;
  */
 abstract class API
 {
-    private $hasError = false;
-    private $errorMessage = '';
     private $shouldCache;
 
     /**
@@ -335,23 +334,29 @@ abstract class API
     }
 
     /**
-     * Gets the current error state.
+     * Handle error messages.
      *
-     * @return bool true if there is a current error, false otherwise
+     * @param string $output
+     *
+     * @return SimpleXMLElement
      */
-    public function hasError()
+    public function handleResult(string $output)
     {
-        return $this->hasError;
-    }
+        $outXML = new SimpleXMLElement($output);
 
-    /**
-     * Gets the current error message string.
-     *
-     * @return string the error message string
-     */
-    public function errorMessage()
-    {
-        return $this->errorMessage;
+                // If we get here theres been an error on the graph. Errors usually come
+        // out as XML for traffic queries.
+        //
+        if ($outXML->{'error-line'}) {
+            $errorMessage = '';
+            foreach ($outXML->{'error-line'} as $error) {
+                $errorMessage .= (string) $error."\n";
+            }
+
+            throw new ArborApiException($errorMessage);
+        }
+
+        return $outXML;
     }
 
     /**

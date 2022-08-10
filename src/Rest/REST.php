@@ -10,11 +10,14 @@
 
 namespace Robwdwd\ArborApiBundle\Rest;
 
+use Exception\ArborApiException;
 use Psr\Cache\CacheItemPoolInterface;
+use Robwdwd\ArborApiBundle\Exception\ArborApiException;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 /**
  * Access the Arbor Sightline REST API.
@@ -31,9 +34,6 @@ class REST
 
     private $shouldCache;
     private $cacheTtl;
-
-    private $hasError = false;
-    private $errorMessages = [];
 
     protected $cacheKeyPrefix = 'arbor_rest';
 
@@ -113,45 +113,13 @@ class REST
     }
 
     /**
-     * Gets the current error state.
-     *
-     * @return bool true if there is a current error, false otherwise
-     */
-    public function hasError()
-    {
-        return $this->hasError;
-    }
-
-    /**
-     * Gets the current error messages.
-     *
-     * @return array the error messages
-     */
-    public function errorMessage()
-    {
-        return $this->errorMessages;
-    }
-
-    /**
-     * Adds an error message to the error array.
-     *
-     * @param string $msg
-     *
-     * @return string the error message string
-     */
-    protected function addErrorMessage(string $msg)
-    {
-        $this->errorMessages[] = $msg;
-    }
-
-    /**
      * Makes a connection to the Arbor API platform using HTTP Component.
      *
      * @param string $method  Request method, POST, PATCH, GET
      * @param string $url     URL to make the request against
      * @param array  $options HTTP Client component options
      *
-     * @return object|null the HTTP Client Response Object, null on error
+     * @return ResponseInterface the HTTP Client Response Object
      */
     private function connect(string $method, string $url, array $options = [])
     {
@@ -162,10 +130,9 @@ class REST
             ];
 
         try {
-            $response = $this->client->request($method, $url, $options);
+            return $this->client->request($method, $url, $options);
         } catch (DecodingExceptionInterface|TransportExceptionInterface $e) {
-            $this->hasError = true;
-            $this->addErrorMessage($e->getMessage());
+            throw new ArborApiException('Error connecting to the server.', 0, $e);
 
             return;
         }
@@ -178,9 +145,9 @@ class REST
      *
      * @param object $response a Valid HTTP Client reponse object
      *
-     * @return array|null The response from the server as an array. Null if error.
+     * @return array the response from the server as an array
      */
-    private function getResult($response)
+    private function getResult(ResponseInterface $response)
     {
         // check the response object is valid.
         //
@@ -192,33 +159,23 @@ class REST
         try {
             $apiResult = $response->toArray(false);
         } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
-            $this->hasError = true;
-            $this->addErrorMessage($e->getMessage());
-
-            return;
+            throw new ArborApiException('Error getting result from server.', 0, $e);
         }
 
         if (empty($apiResult)) {
-            $this->hasError = true;
-            $this->addErrorMessage('ArborAPI: Server returned no data.');
-
-            return;
+            throw new ArborApiException('API server returned no data.', 0, $e);
         }
 
         $statusCode = $response->getStatusCode();
 
         if ($statusCode >= 300) {
-            $this->hasError = true;
-            $this->addErrorMessage('Arbor Leader returned status code: '.$statusCode);
+            $errorMessage = 'API server returned status code: '.$statusCode;
 
             if (isset($apiResult['errors']) && !empty($apiResult['errors'])) {
-                $this->hasError = true;
-                $this->findError($apiResult['errors']);
-
-                return;
+                $errorMessage .= $this->findError($apiResult['errors']);
             }
 
-            return;
+            throw new ArborApiException($errorMessage);
         }
 
         return $apiResult;
@@ -234,8 +191,7 @@ class REST
      */
     protected function doGetRequest(string $url, ?array $args = null)
     {
-        $this->hasError = false;
-        $this->errorMessages = [];
+
 
         $options = [];
 
@@ -255,7 +211,7 @@ class REST
 
         // If there is a result, store in cache
         //
-        if (null !== $result && true === $this->shouldCache) {
+        if (true === $this->shouldCache) {
             $cachedItem->expiresAfter($this->cacheTtl);
             $cachedItem->set($result);
             $this->cache->save($cachedItem);
@@ -276,9 +232,6 @@ class REST
      */
     protected function doMultiGetRequest(string $endpoint, ?array $filters = null, int $perPage = 50, $commitFlag = false)
     {
-        $this->hasError = false;
-        $this->errorMessages = [];
-
         $url = $this->url.$endpoint.'/';
 
         if (null !== $filters) {
@@ -316,12 +269,6 @@ class REST
 
         $this->shouldCache = $oldShouldCache;
 
-        // If there is an error return here.
-        //
-        if ($this->hasError) {
-            return;
-        }
-
         //
         // Work out the number of pages.
         //
@@ -344,19 +291,13 @@ class REST
         //
         foreach ($responses as $response) {
             if (null !== $response) {
-                // get the result, if null there's an error so don't add to final result.
-                $res = $this->getResult($response);
-                if (null !== $res) {
-                    $apiResult[] = $res;
-                }
+                $apiResult[] = $this->getResult($response);
             }
         }
 
         // If caching is enabled add valid result to the cache.
-        // If there is an error (for example a partial result because a request
-        // to get a page had an error) then don't cache the result.
         //
-        if (true !== $this->hasError && true === $this->shouldCache) {
+        if (true === $this->shouldCache) {
             $cachedItem->expiresAfter($this->cacheTtl);
             $cachedItem->set($apiResult);
             $this->cache->save($cachedItem);
@@ -376,9 +317,6 @@ class REST
      */
     protected function doCachedPostRequest(string $url, string $type = 'POST', string $postData = null)
     {
-        $this->hasError = false;
-        $this->errorMessages = [];
-
         if (true === $this->shouldCache) {
             $cachedItem = $this->cache->getItem($this->getPostCacheKey($url, $type, $postData));
 
@@ -389,9 +327,9 @@ class REST
 
         $result = $this->doPostRequest($url, $type, $postData);
 
-        // If there is a result, store in cache
+        // Store in cache
         //
-        if (null !== $result && true === $this->shouldCache) {
+        if (true === $this->shouldCache) {
             $cachedItem->expiresAfter($this->cacheTtl);
             $cachedItem->set($result);
             $this->cache->save($cachedItem);
@@ -407,12 +345,10 @@ class REST
      * @param string $type     Type of post request, PATCH, POST
      * @param string $postData json data to send with the post request
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call.
      */
     protected function doPostRequest(string $url, string $type = 'POST', string $postData = null)
     {
-        $this->hasError = false;
-        $this->errorMessages = [];
 
         $options = [];
 
@@ -478,24 +414,27 @@ class REST
      */
     private function findError(array $errors)
     {
+        $errorMessages = '';
         foreach ($errors as $error) {
             if (isset($error['id'])) {
-                $this->errorMessages[] = $error['id']."\n ";
+                $errorMessages .= $error['id']."\n ";
             }
             if (isset($error['message'])) {
-                $this->errorMessages[] = $error['message']."\n ";
+                $errorMessages .= $error['message']."\n ";
             }
             if (isset($error['title'])) {
-                $this->errorMessages[] = $error['title']."\n ";
+                $errorMessages .= $error['title']."\n ";
             }
             if (isset($error['detail'])) {
                 if (isset($error['source']['pointer'])) {
-                    $this->errorMessages[] = $error['detail'].' : '.$error['source']['pointer']."\n ";
+                    $errorMessages .= $error['detail'].' : '.$error['source']['pointer']."\n ";
                 } else {
-                    $this->errorMessages[] = $error['detail']."\n ";
+                    $errorMessages .= $error['detail']."\n ";
                 }
             }
         }
+
+        return $errorMessages;
     }
 
     /**

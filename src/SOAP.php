@@ -11,8 +11,10 @@
 namespace Robwdwd\ArborApiBundle;
 
 use Psr\Cache\CacheItemPoolInterface;
+use Robwdwd\ArborApiBundle\Exception\ArborApiException;
 use SimpleXMLElement;
 use SoapClient;
+use SoapFault;
 
 /**
  * Access the Arbor Sightline SOAP API.
@@ -55,9 +57,6 @@ class SOAP extends API
      */
     public function getTrafficGraph(string $queryXML, string $graphXML)
     {
-        $this->errorMessage = '';
-        $this->hasError = false;
-
         if (true === $this->shouldCache) {
             $cachedItem = $this->cache->getItem($this->getCacheKey($queryXML.$graphXML));
 
@@ -68,19 +67,10 @@ class SOAP extends API
 
         $soapClient = $this->connect();
 
-        // If there is an error from connecting return
-        //
-        if ($this->hasError) {
-            return;
-        }
-
-        $result = $soapClient->getTrafficGraph($queryXML, $graphXML);
-
-        if (is_soap_fault($result)) {
-            $this->errorMessage = "SOAP Fault: (faultcode: ($result->faultcode), faultstring: ($result->faultstring))";
-            $this->hasError = true;
-
-            return;
+        try {
+            $result = $soapClient->getTrafficGraph($queryXML, $graphXML);
+        } catch (SoapFault $th) {
+            throw new ArborApiException('Error getting traffic graph.', 0, $th);
         }
 
         $fileInfo = finfo_open();
@@ -99,15 +89,8 @@ class SOAP extends API
         // If we get here theres been an error on the graph. Errors usually come
         // out as XML for traffic queries.
         //
-        $outXML = new SimpleXMLElement($result);
-        if ($outXML->{'error-line'}) {
-            foreach ($outXML->{'error-line'} as $error) {
-                $this->errorMessage .= (string) $error."\n";
-            }
-            $this->hasError = true;
+        $this->handleResult($result);
 
-            return;
-        }
     }
 
     /**
@@ -119,9 +102,6 @@ class SOAP extends API
      */
     public function getTrafficXML(string $queryXML)
     {
-        $this->errorMessage = '';
-        $this->hasError = false;
-
         if (true === $this->shouldCache) {
             $cachedItem = $this->cache->getItem($this->getCacheKey($queryXML));
 
@@ -132,34 +112,13 @@ class SOAP extends API
 
         $soapClient = $this->connect();
 
-        // If there is an error from connecting return
-        //
-        if ($this->hasError) {
-            return;
+        try {
+            $result = $soapClient->runXmlQuery($queryXML, 'xml');
+        } catch (SoapFault $th) {
+            throw new ArborApiException('Error getting traffic xml.', 0, $th);
         }
 
-        $result = $soapClient->runXmlQuery($queryXML, 'xml');
-
-        if (is_soap_fault($result)) {
-            $this->errorMessage = "SOAP Fault: (faultcode: ($result->faultcode), faultstring: ($result->faultstring))";
-            $this->hasError = true;
-
-            return;
-        }
-
-        // If we get here theres been an error on the graph. Errors usually come
-        // out as XML for traffic queries.
-        //
-        $outXML = new SimpleXMLElement($result);
-
-        if ($outXML->{'error-line'}) {
-            foreach ($outXML->{'error-line'} as $error) {
-                $this->errorMessage .= (string) $error."\n";
-            }
-            $this->hasError = true;
-
-            return;
-        }
+        $outXML = $this->handleResult($result);
 
         // If there is a valid result, store in cache.
         //
@@ -182,27 +141,13 @@ class SOAP extends API
      */
     public function cliRun(string $command, int $timeout = 20)
     {
-        $this->errorMessage = '';
-        $this->hasError = false;
-
         $soapClient = $this->connect();
 
-        // If there is an error from connecting return
-        //
-        if ($this->hasError) {
-            return;
+        try {
+            return $soapClient->cliRun($command, $timeout);
+        } catch (SoapFault $th) {
+            throw new ArborApiException('Error connecting to CLI.', 0, $th);
         }
-
-        $result = $soapClient->cliRun($command, $timeout);
-
-        if (is_soap_fault($result)) {
-            $this->errorMessage = "SOAP Fault: (faultcode: ($result->faultcode), faultstring: ($result->faultstring))";
-            $this->hasError = true;
-
-            return;
-        }
-
-        return $result;
     }
 
     /**
@@ -223,7 +168,6 @@ class SOAP extends API
             'verifyhost' => false,
             'soap_version' => SOAP_1_2,
             'trace' => 1,
-            'exceptions' => false,
             'connection_timeout' => 180,
             'stream_context' => stream_context_create($opts),
             'location' => "https://$this->hostname/soap/sp",
@@ -232,16 +176,11 @@ class SOAP extends API
             'authentication' => SOAP_AUTHENTICATION_DIGEST,
         ];
 
-        $client = new SoapClient($this->wsdl, $params);
-
-        if (is_soap_fault($client)) {
-            $this->errorMessage = "SOAP Fault: (faultcode: ($client->faultcode), faultstring: ($client->faultstring))";
-            $this->hasError = true;
-
-            return;
+        try {
+            return new SoapClient($this->wsdl, $params);
+        } catch (SoapFault $th) {
+            throw new ArborApiException('Unable to connect to Arbor API.', 0, $th);
         }
-
-        return $client;
     }
 
     /**

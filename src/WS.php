@@ -11,6 +11,7 @@
 namespace Robwdwd\ArborApiBundle;
 
 use Psr\Cache\CacheItemPoolInterface;
+use Robwdwd\ArborApiBundle\Exception\ArborApiException;
 use SimpleXMLElement;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
@@ -74,10 +75,6 @@ class WS extends API
 
         $output = $this->doHTTPRequest($url, $args);
 
-        if ($this->hasError) {
-            return;
-        }
-
         $fileInfo = finfo_open();
         $mimeType = finfo_buffer($fileInfo, $output, FILEINFO_MIME_TYPE);
 
@@ -91,18 +88,7 @@ class WS extends API
             return $output;
         }
 
-        // If we get here theres been an error on the graph. Errors usually come
-        // out as XML for traffic queries.
-        //
-        $outXML = new SimpleXMLElement($output);
-        if ($outXML->{'error-line'}) {
-            foreach ($outXML->{'error-line'} as $error) {
-                $this->errorMessage .= (string) $error."\n";
-            }
-            $this->hasError = true;
-
-            return;
-        }
+        $this->handleResult($output);
     }
 
     /**
@@ -128,24 +114,7 @@ class WS extends API
             }
         }
 
-        $output = $this->doHTTPRequest($url, $args);
-
-        if ($this->hasError) {
-            return;
-        }
-
-        // If we get here theres been an error on the graph. Errors usually come
-        // out as XML for traffic queries.
-        //
-        $outXML = new SimpleXMLElement($output);
-        if ($outXML->{'error-line'}) {
-            foreach ($outXML->{'error-line'} as $error) {
-                $this->errorMessage .= (string) $error."\n";
-            }
-            $this->hasError = true;
-
-            return;
-        }
+        $outXML = $this->handleResult($this->doHTTPRequest($url, $args));
 
         if (true === $this->shouldCache) {
             $cachedItem->expiresAfter($this->cacheTtl);
@@ -166,26 +135,17 @@ class WS extends API
      */
     private function doHTTPRequest(string $url, array $args)
     {
-        $this->hasError = false;
-        $this->errorMessage = '';
-
         $args['api_key'] = $this->wsKey;
 
         try {
             $response = $this->client->request('GET', $url, ['query' => $args]);
             $content = $response->getContent();
         } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
-            $this->hasError = true;
-            $this->errorMessage = $e->getMessage();
-
-            return;
+            throw new ArborApiException('Error in HTTP request', 0, $e);
         }
 
         if (empty($content)) {
-            $this->hasError = true;
-            $this->errorMessage = 'Server returned no data.';
-
-            return;
+            throw new ArborApiException('API Server returned no data.');
         }
 
         return $content;
