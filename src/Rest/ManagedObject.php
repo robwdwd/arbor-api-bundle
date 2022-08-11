@@ -2,7 +2,7 @@
 /*
  * This file is part of the Arbor API Bundle.
  *
- * Copyright 2021 Robert Woodward.
+ * Copyright 2022 Robert Woodward
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -43,10 +43,17 @@ class ManagedObject extends REST
      * @param array  $relationships   Relationships to this managed object. See Arbor SDK Docs.
      * @param array  $extraAttributes Extra attributes to add to this managed object. See Arbor SDK Docs.
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call
      */
-    public function createManagedObject(string $name, string $family, array $tags, string $matchType, string $match, ?array $relationships = null, ?array $extraAttributes = null)
-    {
+    public function createManagedObject(
+        string $name,
+        string $family,
+        array $tags,
+        string $matchType,
+        string $match,
+        ?array $relationships = null,
+        ?array $extraAttributes = null
+    ) {
         $url = $this->url.'/managed_objects/';
 
         // Disable host detection settings in relationship unless
@@ -105,7 +112,7 @@ class ManagedObject extends REST
      *                              See Arbor API documentation for a full list of attributes.
      * @param array  $relationships Relationships to this managed object. See Arbor SDK Docs.
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call
      */
     public function changeManagedObject(string $arborID, array $attributes, ?array $relationships = null)
     {

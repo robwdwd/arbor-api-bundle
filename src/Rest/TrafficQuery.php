@@ -2,7 +2,7 @@
 /*
  * This file is part of the Arbor API Bundle.
  *
- * Copyright 2021 Robert Woodward.
+ * Copyright 2022 Robert Woodward
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -34,7 +34,7 @@ class TrafficQuery extends REST
         $url = $this->url.'/traffic_queries/';
 
         sort($interfaces, SORT_NUMERIC);
-        
+
         // Make sure all the interfaces are string values
         //
         $interfaces = array_map('strval', $interfaces);
@@ -137,10 +137,22 @@ class TrafficQuery extends REST
         return $this->doCachedPostRequest($url, 'POST', $queryJson);
     }
 
-    public function buildTrafficQueryJson($filters, $start, $end, string $unit = 'bps', $limit = 100, array $trafficClasses = ['in', 'out'])
+    /**
+     *  Build Json for traffic query.
+     *
+     * @param array  $filters
+     * @param string $start
+     * @param string $end
+     * @param string $unit
+     * @param int    $limit
+     * @param array  $trafficClasses
+     *
+     * @return string Json string for traffic query
+     */
+    public function buildTrafficQueryJson(array $filters, string $start, string $end, string $unit = 'bps', int $limit = 100, array $trafficClasses = ['in', 'out'])
     {
-        $start = new \Datetime($start);
-        $end = new \Datetime($end);
+        $start = new \DateTime($start);
+        $end = new \DateTime($end);
 
         // Round down to the nearest hour.
         $start->setTime($start->format('H'), 0);

@@ -2,7 +2,7 @@
 /*
  * This file is part of the Arbor API Bundle.
  *
- * Copyright 2021 Robert Woodward.
+ * Copyright 2022 Robert Woodward
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -25,7 +25,7 @@ class MitigationTemplate extends REST
      * @param array $filters Filters
      * @param int   $perPage Number of pages to get from the server at a time. Default 50.
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call
      */
     public function getMitigationTemplates(?array $filters = null, int $perPage = 50)
     {
@@ -39,15 +39,11 @@ class MitigationTemplate extends REST
      * @param string $name        New name for copied mitigation template
      * @param string $description New description for copied mitigation template
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call
      */
     public function copyMitigationTemplate(string $templateID, string $name, string $description)
     {
         $existingTemplate = $this->getByID('mitigation_templates', $templateID);
-
-        if ($this->hasError()) {
-            return;
-        }
 
         $out = $this->createMitigationTemplate($name, $existingTemplate['data']['attributes']['ip_version'], $description, $existingTemplate['data']['attributes']['subobject'], $existingTemplate['data']['relationships'], $existingTemplate['data']['attributes']['subtype']);
 
@@ -65,7 +61,7 @@ class MitigationTemplate extends REST
      * @param array  $relationships   Relationships to this mitigation template. See Arbor SDK Docs
      * @param string $subtype         Subtype for this mitigation template
      *
-     * @return array|null The output of the API call, null otherwise
+     * @return array The output of the API call
      */
     public function createMitigationTemplate(string $name, string $ipVersion, string $description, array $countermeasures, array $relationships = [], string $subtype = 'tms')
     {
@@ -106,7 +102,7 @@ class MitigationTemplate extends REST
      *                              See Arbor API documentation for a full list of attributes.
      * @param array  $relationships Relationships to this managed object. See Arbor SDK Docs.
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call
      */
     public function changeMitigationTemplate(string $arborID, array $attributes, ?array $relationships = null)
     {

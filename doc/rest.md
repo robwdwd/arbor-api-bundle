@@ -8,20 +8,15 @@ is avaiable from Arbor and from the Portal UI.
 The REST class uses the HTTP client to handle the error checking based
 on HTTP status code or a transport/network error but it also tries to
 find errors in the returned response from the Arbor API. If there is an
-error most functions will return null but you should specifically check
-for errors using `` `hasError() ``\` function. Error messages can be
-read using the `` `errorMessage() ``\` function which will return an
-array of all errors.
+error an ArborApiException will be thrown.
 
 ```php
-// Check for errors.
-if ($arborRest->hasError()) {
-    foreach ($arborRest->errorMessage() as $error) {
-        $this->addFlash('error', $error);
-    }
-
-    return $this->redirectToRoute('peer_view', ['id' => $peer->getId()]);
+try {
+    $response = $arborApi->getByID('managed_object', '22');
+} catch ArborApiException $e {
+    $this->addFlash('error', $e->errorMessage());
 }
+
 ```
 
 ## Getting Elements
@@ -202,10 +197,8 @@ The following gets a notification group.
 ```php
 public function list(Request $request NotificationGroup $ng): Response
 {
-
     $ArborNG = $ng->getNotificationGroups('name', 'Group1');
     dump ($ArborNG);
-
 }
 ```
 
@@ -218,14 +211,12 @@ Mitigation templates can be updated, changed and copied in the same way as manag
 use Robwdwd\ArborApiBundle\Rest\MitigationTemplate;
 
 public function updateMo(Peer $peer, MitigationTemplate $mitigationTemplate): Response
-
+{
     $templateID = 1; // Template to copy from
     $newName = 'Copied Template';
     $newDescription = 'This is a template copy';
 
     $mitigationTemplate->copyMitigationTemplate($templateID,  $newName, $newDescription);
-
-    // Check for errors.
 }
 ```
 

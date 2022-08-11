@@ -2,7 +2,7 @@
 /*
  * This file is part of the Arbor API Bundle.
  *
- * Copyright 2021 Robert Woodward.
+ * Copyright 2022 Robert Woodward
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -10,7 +10,6 @@
 
 namespace Robwdwd\ArborApiBundle\Rest;
 
-use Exception\ArborApiException;
 use Psr\Cache\CacheItemPoolInterface;
 use Robwdwd\ArborApiBundle\Exception\ArborApiException;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
@@ -61,7 +60,7 @@ class REST
      * @param string $endpoint Type of object to get. managed_object etc
      * @param string $arborID  Object ID
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call
      */
     public function getByID(string $endpoint, string $arborID)
     {
@@ -89,7 +88,7 @@ class REST
         $apiResult = $this->doMultiGetRequest($endpoint, $filters, $perPage, $commitFlag);
 
         if (!$apiResult) {
-            return;
+            return $results;
         }
 
         foreach ($apiResult as $result) {
@@ -113,86 +112,15 @@ class REST
     }
 
     /**
-     * Makes a connection to the Arbor API platform using HTTP Component.
-     *
-     * @param string $method  Request method, POST, PATCH, GET
-     * @param string $url     URL to make the request against
-     * @param array  $options HTTP Client component options
-     *
-     * @return ResponseInterface the HTTP Client Response Object
-     */
-    private function connect(string $method, string $url, array $options = [])
-    {
-        $options['headers'] =
-            [
-                'Content-Type: application/vnd.api+json',
-                'X-Arbux-APIToken: '.$this->restToken,
-            ];
-
-        try {
-            return $this->client->request($method, $url, $options);
-        } catch (DecodingExceptionInterface|TransportExceptionInterface $e) {
-            throw new ArborApiException('Error connecting to the server.', 0, $e);
-
-            return;
-        }
-
-        return $response;
-    }
-
-    /**
-     * Get's the returned content from the request.
-     *
-     * @param object $response a Valid HTTP Client reponse object
-     *
-     * @return array the response from the server as an array
-     */
-    private function getResult(ResponseInterface $response)
-    {
-        // check the response object is valid.
-        //
-        if (!$response) {
-            return;
-        }
-
-        // Get the content.
-        try {
-            $apiResult = $response->toArray(false);
-        } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
-            throw new ArborApiException('Error getting result from server.', 0, $e);
-        }
-
-        if (empty($apiResult)) {
-            throw new ArborApiException('API server returned no data.', 0, $e);
-        }
-
-        $statusCode = $response->getStatusCode();
-
-        if ($statusCode >= 300) {
-            $errorMessage = 'API server returned status code: '.$statusCode;
-
-            if (isset($apiResult['errors']) && !empty($apiResult['errors'])) {
-                $errorMessage .= $this->findError($apiResult['errors']);
-            }
-
-            throw new ArborApiException($errorMessage);
-        }
-
-        return $apiResult;
-    }
-
-    /**
      * Perform a GET request against the API.
      *
      * @param string $url  URL to make the request against
      * @param array  $args Optional query arguments to append to the URL
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array The output of the API call
      */
     protected function doGetRequest(string $url, ?array $args = null)
     {
-
-
         $options = [];
 
         if (null !== $args) {
@@ -228,7 +156,7 @@ class REST
      * @param int        $perPage    Total number of objects per page. (Default 50)
      * @param bool       $commitFlag Add config=commited to endpoints which require it, default false
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array The output of the API call
      */
     protected function doMultiGetRequest(string $endpoint, ?array $filters = null, int $perPage = 50, $commitFlag = false)
     {
@@ -313,7 +241,7 @@ class REST
      * @param string $type     Type of post request, PATCH, POST
      * @param string $postData json data to send with the post request
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array The output of the API call
      */
     protected function doCachedPostRequest(string $url, string $type = 'POST', string $postData = null)
     {
@@ -345,11 +273,10 @@ class REST
      * @param string $type     Type of post request, PATCH, POST
      * @param string $postData json data to send with the post request
      *
-     * @return array the output of the API call.
+     * @return array the output of the API call
      */
     protected function doPostRequest(string $url, string $type = 'POST', string $postData = null)
     {
-
         $options = [];
 
         $options['body'] = $postData;
@@ -377,6 +304,71 @@ class REST
         }
 
         return urlencode($search);
+    }
+
+    /**
+     * Makes a connection to the Arbor API platform using HTTP Component.
+     *
+     * @param string $method  Request method, POST, PATCH, GET
+     * @param string $url     URL to make the request against
+     * @param array  $options HTTP Client component options
+     *
+     * @return ResponseInterface the HTTP Client Response Object
+     */
+    private function connect(string $method, string $url, array $options = [])
+    {
+        $options['headers'] =
+            [
+                'Content-Type: application/vnd.api+json',
+                'X-Arbux-APIToken: '.$this->restToken,
+            ];
+
+        try {
+            return $this->client->request($method, $url, $options);
+        } catch (DecodingExceptionInterface|TransportExceptionInterface $e) {
+            throw new ArborApiException('Error connecting to the server.', 0, $e);
+        }
+    }
+
+    /**
+     * Get's the returned content from the request.
+     *
+     * @param object $response a Valid HTTP Client reponse object
+     *
+     * @return array the response from the server as an array
+     */
+    private function getResult(ResponseInterface $response)
+    {
+        // check the response object is valid.
+        //
+        if (!$response) {
+            throw new ArborApiException('Invalid response object from HTTP client.');
+        }
+
+        // Get the content.
+        try {
+            $apiResult = $response->toArray(false);
+        } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
+            throw new ArborApiException('Error getting result from server.', 0, $e);
+        }
+
+        if (empty($apiResult)) {
+            throw new ArborApiException('API server returned no data.');
+        }
+
+        $statusCode = $response->getStatusCode();
+
+        if ($statusCode >= 300) {
+            $errorMessage = 'API server returned status code: '.$statusCode;
+
+            if (isset($apiResult['errors']) && !empty($apiResult['errors'])) {
+                $errorMessage .= $this->findError($apiResult['errors']);
+            }
+
+            throw new ArborApiException($errorMessage);
+        }
+
+        return $apiResult;
     }
 
     /**

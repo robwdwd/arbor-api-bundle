@@ -2,7 +2,7 @@
 /*
  * This file is part of the Arbor API Bundle.
  *
- * Copyright 2021 Robert Woodward.
+ * Copyright 2022 Robert Woodward
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -25,7 +25,7 @@ class NotificationGroup extends REST
      * @param array $filters Search filters
      * @param int   $perPage Number of pages to get from the server at a time. Default 50.
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call
      */
     public function getNotificationGroups(?array $filters = null, int $perPage = 50)
     {
@@ -39,7 +39,7 @@ class NotificationGroup extends REST
      * @param array  $emailAddresses  Email addresses to add to the notification group
      * @param array  $extraAttributes Extra attributes to add to this notification group. See Arbor SDK Docs.
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call
      */
     public function createNotificationGroup(string $name, ?array $emailAddresses = null, ?array $extraAttributes = null)
     {
@@ -83,7 +83,7 @@ class NotificationGroup extends REST
      * @param array  $attributes Attributes to change on the notifciation group
      *                           See Arbor API documentation for a full list of attributes
      *
-     * @return array|null the output of the API call, null otherwise
+     * @return array the output of the API call
      */
     public function changeNotificationGroup(string $arborID, array $attributes)
     {

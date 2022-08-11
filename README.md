@@ -20,7 +20,7 @@ ArborAPI supports the following:
 
 ArborAPI PHP Class requires the following:
 
-- PHP 7.2 or higher
+- PHP 8.1 or higher
 - symfony/http-client
 - symfony/cache
 - ext/dom
