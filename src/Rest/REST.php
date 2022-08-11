@@ -26,8 +26,6 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 class REST
 {
     protected $url;
-    protected $client;
-    protected $cache;
 
     private $restToken;
 
@@ -39,16 +37,13 @@ class REST
     /**
      * Contructor.
      *
-     * @param HttpClientInterface $client
      * @param CacheInterface      $cache
      * @param array               $config Configuration
      */
-    public function __construct(HttpClientInterface $client, CacheItemPoolInterface $cache, array $config)
+    public function __construct(protected HttpClientInterface $client, protected CacheItemPoolInterface $cache, array $config)
     {
         $this->url = 'https://'.$config['hostname'].'/api/sp/';
         $this->restToken = $config['resttoken'];
-        $this->client = $client;
-        $this->cache = $cache;
 
         $this->shouldCache = $config['cache'];
         $this->cacheTtl = $config['cache_ttl'];
@@ -121,6 +116,7 @@ class REST
      */
     protected function doGetRequest(string $url, ?array $args = null)
     {
+        $cachedItem = null;
         $options = [];
 
         if (null !== $args) {
@@ -152,14 +148,13 @@ class REST
      * Perform multiple requests against the Arbor REST API.
      *
      * @param string     $endpoint   endpoint to query against, see Arbor REST API documentation
-     * @param array|null $filters
      * @param int        $perPage    Total number of objects per page. (Default 50)
      * @param bool       $commitFlag Add config=commited to endpoints which require it, default false
-     *
      * @return array The output of the API call
      */
     protected function doMultiGetRequest(string $endpoint, ?array $filters = null, int $perPage = 50, $commitFlag = false)
     {
+        $cachedItem = null;
         $url = $this->url.$endpoint.'/';
 
         if (null !== $filters) {
@@ -201,7 +196,7 @@ class REST
         // Work out the number of pages.
         //
         if (isset($apiResult[0]['links']['last'])) {
-            parse_str(parse_url($apiResult[0]['links']['last'])['query'], $parsed);
+            parse_str(parse_url((string) $apiResult[0]['links']['last'])['query'], $parsed);
             $totalPages = $parsed['page'];
         }
 
@@ -245,6 +240,7 @@ class REST
      */
     protected function doCachedPostRequest(string $url, string $type = 'POST', string $postData = null)
     {
+        $cachedItem = null;
         if (true === $this->shouldCache) {
             $cachedItem = $this->cache->getItem($this->getPostCacheKey($url, $type, $postData));
 
@@ -287,23 +283,22 @@ class REST
     /**
      * Converts a search filter into a valid url encoded search string.
      *
-     * @param mixed $search
      *
      * @return string Encoded URL string
      */
-    private function searchFilterToUrl($search)
+    private function searchFilterToUrl(mixed $search)
     {
         $searchUrl = [];
 
         if (is_array($search)) {
             foreach ($search as $term) {
-                $searchUrl[] = urlencode($term);
+                $searchUrl[] = urlencode((string) $term);
             }
 
             return implode('|', $searchUrl);
         }
 
-        return urlencode($search);
+        return urlencode((string) $search);
     }
 
     /**
@@ -374,7 +369,6 @@ class REST
     /**
      * Converts a filter into a valid URL.
      *
-     * @param array $filters
      *
      * @return string Encoded URL string
      */
@@ -450,9 +444,7 @@ class REST
      * Get the cache Key.
      *
      * @param string $url      URL to make the request against
-     * @param string $type
      * @param mixed  $postData
-     *
      * @return string cache key
      */
     private function getPostCacheKey(string $url, string $type, string $postData)

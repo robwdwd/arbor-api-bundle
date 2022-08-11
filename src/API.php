@@ -336,7 +336,6 @@ abstract class API
     /**
      * Handle error messages.
      *
-     * @param string $output
      *
      * @return SimpleXMLElement
      */

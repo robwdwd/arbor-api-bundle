@@ -19,8 +19,6 @@ class ArborApiBundle extends Bundle
 {
     /**
      * Get path for bundle.
-     *
-     * @return string
      */
     public function getPath(): string
     {

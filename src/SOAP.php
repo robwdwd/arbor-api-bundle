@@ -27,21 +27,17 @@ class SOAP extends API
     private $username;
     private $password;
     private $wsdl;
-
-    private $cache;
     private $cacheTtl;
 
     /**
      * @param CacheInterface $cache
-     * @param array          $config
      */
-    public function __construct(CacheItemPoolInterface $cache, array $config)
+    public function __construct(private readonly CacheItemPoolInterface $cache, array $config)
     {
         $this->hostname = $config['hostname'];
         $this->username = $config['username'];
         $this->password = $config['password'];
         $this->wsdl = $config['wsdl'];
-        $this->cache = $cache;
 
         $this->shouldCache = $config['cache'];
         $this->cacheTtl = $config['cache_ttl'];
@@ -57,6 +53,7 @@ class SOAP extends API
      */
     public function getTrafficGraph(string $queryXML, string $graphXML)
     {
+        $cachedItem = null;
         if (true === $this->shouldCache) {
             $cachedItem = $this->cache->getItem($this->getCacheKey($queryXML.$graphXML));
 
@@ -101,6 +98,7 @@ class SOAP extends API
      */
     public function getTrafficXML(string $queryXML)
     {
+        $cachedItem = null;
         if (true === $this->shouldCache) {
             $cachedItem = $this->cache->getItem($this->getCacheKey($queryXML));
 

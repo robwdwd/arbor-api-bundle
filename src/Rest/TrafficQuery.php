@@ -140,12 +140,6 @@ class TrafficQuery extends REST
     /**
      *  Build Json for traffic query.
      *
-     * @param array  $filters
-     * @param string $start
-     * @param string $end
-     * @param string $unit
-     * @param int    $limit
-     * @param array  $trafficClasses
      *
      * @return string Json string for traffic query
      */

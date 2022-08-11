@@ -30,20 +30,13 @@ class WS extends API
 
     private $cacheTtl;
 
-    private $client;
-    private $cache;
-
     /**
-     * @param HttpClientInterface $client
      * @param CacheInterface      $cache
-     * @param array               $config
      */
-    public function __construct(HttpClientInterface $client, CacheItemPoolInterface $cache, array $config)
+    public function __construct(private readonly HttpClientInterface $client, private readonly CacheItemPoolInterface $cache, array $config)
     {
         $this->url = 'https://'.$config['hostname'].'/arborws/';
         $this->wsKey = $config['wskey'];
-        $this->client = $client;
-        $this->cache = $cache;
 
         $this->shouldCache = $config['cache'];
         $this->cacheTtl = $config['cache_ttl'];
@@ -59,6 +52,7 @@ class WS extends API
      */
     public function getTrafficGraph(string $queryXML, string $graphXML)
     {
+        $cachedItem = null;
         $url = $this->url.'/traffic/';
 
         $args = [
@@ -100,6 +94,7 @@ class WS extends API
      */
     public function getTrafficXML(string $queryXML)
     {
+        $cachedItem = null;
         $url = $this->url.'/traffic/';
 
         $args = [
@@ -128,8 +123,6 @@ class WS extends API
     /**
      * Perform HTTP Web Services request against the sightline API.
      *
-     * @param string $url
-     * @param array  $args
      *
      * @return string Request output content
      */
