@@ -24,13 +24,18 @@ use SoapFault;
 class SOAP extends API
 {
     private $hostname;
+
     private $username;
+
     private $password;
+
     private $wsdl;
+
     private $cacheTtl;
 
     /**
      * @param CacheInterface $cache
+     * @param array          $config
      */
     public function __construct(private readonly CacheItemPoolInterface $cache, array $config)
     {

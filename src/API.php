@@ -23,7 +23,7 @@ use SimpleXMLElement;
  */
 abstract class API
 {
-    private $shouldCache;
+    private ?bool $shouldCache = null;
 
     /**
      * Get traffic XML from Arbor Sightline using the web services API.
@@ -336,6 +336,7 @@ abstract class API
     /**
      * Handle error messages.
      *
+     * @param string $output
      *
      * @return SimpleXMLElement
      */

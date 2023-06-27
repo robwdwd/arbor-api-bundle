@@ -27,7 +27,7 @@ class NotificationGroup extends REST
      *
      * @return array the output of the API call
      */
-    public function getNotificationGroups(?array $filters = null, int $perPage = 50)
+    public function getNotificationGroups(array $filters = null, int $perPage = 50)
     {
         return $this->findRest('notification_groups', $filters, $perPage);
     }
@@ -41,7 +41,7 @@ class NotificationGroup extends REST
      *
      * @return array the output of the API call
      */
-    public function createNotificationGroup(string $name, ?array $emailAddresses = null, ?array $extraAttributes = null)
+    public function createNotificationGroup(string $name, array $emailAddresses = null, array $extraAttributes = null)
     {
         $url = $this->url.'/notification_groups/';
 

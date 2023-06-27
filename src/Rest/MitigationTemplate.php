@@ -27,7 +27,7 @@ class MitigationTemplate extends REST
      *
      * @return array the output of the API call
      */
-    public function getMitigationTemplates(?array $filters = null, int $perPage = 50)
+    public function getMitigationTemplates(array $filters = null, int $perPage = 50)
     {
         return $this->findRest('mitigation_templates', $filters, $perPage);
     }
@@ -104,7 +104,7 @@ class MitigationTemplate extends REST
      *
      * @return array the output of the API call
      */
-    public function changeMitigationTemplate(string $arborID, array $attributes, ?array $relationships = null)
+    public function changeMitigationTemplate(string $arborID, array $attributes, array $relationships = null)
     {
         $url = $this->url.'/mitigation_templates/'.$arborID;
 

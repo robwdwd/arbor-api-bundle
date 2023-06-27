@@ -30,6 +30,7 @@ class REST
     private $restToken;
 
     private $shouldCache;
+
     private $cacheTtl;
 
     protected $cacheKeyPrefix = 'arbor_rest';
@@ -37,8 +38,9 @@ class REST
     /**
      * Contructor.
      *
-     * @param CacheInterface      $cache
-     * @param array               $config Configuration
+     * @param CacheInterface               $cache
+     * @param array                        $config Configuration
+     * @param protectedHttpClientInterface $client
      */
     public function __construct(protected HttpClientInterface $client, protected CacheItemPoolInterface $cache, array $config)
     {
@@ -76,7 +78,7 @@ class REST
      *
      * @return array returns an array with the records from the API
      */
-    public function findRest(string $endpoint, ?array $filters = null, int $perPage = 50, $commitFlag = false)
+    public function findRest(string $endpoint, array $filters = null, int $perPage = 50, $commitFlag = false)
     {
         $results = [];
 
@@ -114,7 +116,7 @@ class REST
      *
      * @return array The output of the API call
      */
-    protected function doGetRequest(string $url, ?array $args = null)
+    protected function doGetRequest(string $url, array $args = null)
     {
         $cachedItem = null;
         $options = [];
@@ -147,12 +149,14 @@ class REST
     /**
      * Perform multiple requests against the Arbor REST API.
      *
-     * @param string     $endpoint   endpoint to query against, see Arbor REST API documentation
-     * @param int        $perPage    Total number of objects per page. (Default 50)
-     * @param bool       $commitFlag Add config=commited to endpoints which require it, default false
+     * @param string $endpoint   endpoint to query against, see Arbor REST API documentation
+     * @param int    $perPage    Total number of objects per page. (Default 50)
+     * @param bool   $commitFlag Add config=commited to endpoints which require it, default false
+     * @param ?array $filters
+     *
      * @return array The output of the API call
      */
-    protected function doMultiGetRequest(string $endpoint, ?array $filters = null, int $perPage = 50, $commitFlag = false)
+    protected function doMultiGetRequest(string $endpoint, array $filters = null, int $perPage = 50, $commitFlag = false)
     {
         $cachedItem = null;
         $url = $this->url.$endpoint.'/';
@@ -283,6 +287,7 @@ class REST
     /**
      * Converts a search filter into a valid url encoded search string.
      *
+     * @param mixed $search
      *
      * @return string Encoded URL string
      */
@@ -369,6 +374,7 @@ class REST
     /**
      * Converts a filter into a valid URL.
      *
+     * @param array $filters
      *
      * @return string Encoded URL string
      */
@@ -431,7 +437,7 @@ class REST
      *
      * @return string cache key
      */
-    private function getCacheKey(string $url, ?array $args = null)
+    private function getCacheKey(string $url, array $args = null)
     {
         if (null === $args) {
             return $this->cacheKeyPrefix.'_'.sha1($url);
@@ -445,6 +451,8 @@ class REST
      *
      * @param string $url      URL to make the request against
      * @param mixed  $postData
+     * @param string $type
+     *
      * @return string cache key
      */
     private function getPostCacheKey(string $url, string $type, string $postData)

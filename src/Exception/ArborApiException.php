@@ -10,11 +10,13 @@
 
 namespace Robwdwd\ArborApiBundle\Exception;
 
+use Exception;
+
 /**
  * Arbor API Exception Exception.
  *
  * @author Rob Woodward <rob@emailplus.org>
  */
-class ArborApiException extends \Exception
+class ArborApiException extends Exception
 {
 }

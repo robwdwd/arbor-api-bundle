@@ -26,12 +26,15 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class WS extends API
 {
     private $wsKey;
-    private $url;
+
+    private readonly string $url;
 
     private $cacheTtl;
 
     /**
-     * @param CacheInterface      $cache
+     * @param CacheInterface                     $cache
+     * @param privatereadonlyHttpClientInterface $client
+     * @param array                              $config
      */
     public function __construct(private readonly HttpClientInterface $client, private readonly CacheItemPoolInterface $cache, array $config)
     {
@@ -123,6 +126,8 @@ class WS extends API
     /**
      * Perform HTTP Web Services request against the sightline API.
      *
+     * @param string $url
+     * @param array  $args
      *
      * @return string Request output content
      */

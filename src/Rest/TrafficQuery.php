@@ -10,6 +10,8 @@
 
 namespace Robwdwd\ArborApiBundle\Rest;
 
+use DateTime;
+
 /**
  * Access the Arbor Sightline REST API for the traffic queries endpoint.
  *
@@ -140,13 +142,19 @@ class TrafficQuery extends REST
     /**
      *  Build Json for traffic query.
      *
+     * @param array  $filters
+     * @param string $start
+     * @param string $end
+     * @param string $unit
+     * @param int    $limit
+     * @param array  $trafficClasses
      *
      * @return string Json string for traffic query
      */
     public function buildTrafficQueryJson(array $filters, string $start, string $end, string $unit = 'bps', int $limit = 100, array $trafficClasses = ['in', 'out'])
     {
-        $start = new \DateTime($start);
-        $end = new \DateTime($end);
+        $start = new DateTime($start);
+        $end = new DateTime($end);
 
         // Round down to the nearest hour.
         $start->setTime($start->format('H'), 0);

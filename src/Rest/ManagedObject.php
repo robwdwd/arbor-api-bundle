@@ -27,7 +27,7 @@ class ManagedObject extends REST
      *
      * @return array Returns an array with the records from the API
      */
-    public function getManagedObjects(?array $filters = null, int $perPage = 50)
+    public function getManagedObjects(array $filters = null, int $perPage = 50)
     {
         return $this->findRest('managed_objects', $filters, $perPage);
     }
@@ -51,8 +51,8 @@ class ManagedObject extends REST
         array $tags,
         string $matchType,
         string $match,
-        ?array $relationships = null,
-        ?array $extraAttributes = null
+        array $relationships = null,
+        array $extraAttributes = null
     ) {
         $url = $this->url.'/managed_objects/';
 
@@ -114,7 +114,7 @@ class ManagedObject extends REST
      *
      * @return array the output of the API call
      */
-    public function changeManagedObject(string $arborID, array $attributes, ?array $relationships = null)
+    public function changeManagedObject(string $arborID, array $attributes, array $relationships = null)
     {
         $url = $this->url.'/managed_objects/'.$arborID;
 
