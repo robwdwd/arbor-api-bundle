@@ -45,6 +45,11 @@ class MitigationTemplate extends REST
     {
         $existingTemplate = $this->getByID('mitigation_templates', $templateID);
 
+        // Fix for IP location policing in 9.7 where it returns an empty array.
+        if (empty($existingTemplate['data']['attributes']['subobject']['ip_location_policing'])) {
+            unset($existingTemplate['data']['attributes']['subobject']['ip_location_policing']);
+        }
+
         $out = $this->createMitigationTemplate($name, $existingTemplate['data']['attributes']['ip_version'], $description, $existingTemplate['data']['attributes']['subobject'], $existingTemplate['data']['relationships'], $existingTemplate['data']['attributes']['subtype']);
 
         return $out;
