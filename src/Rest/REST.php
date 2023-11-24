@@ -15,6 +15,8 @@ use Robwdwd\ArborApiBundle\Exception\ArborApiException;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Component\HttpClient\Exception\TimeoutException;
+use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
@@ -348,7 +350,7 @@ class REST
         // Get the content.
         try {
             $apiResult = $response->toArray(false);
-        } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
+        } catch (ExceptionInterface $e) {
             throw new ArborApiException('Error getting result from server.', 0, $e);
         }
 
