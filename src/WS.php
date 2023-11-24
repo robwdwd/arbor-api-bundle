@@ -13,9 +13,7 @@ namespace Robwdwd\ArborApiBundle;
 use Psr\Cache\CacheItemPoolInterface;
 use Robwdwd\ArborApiBundle\Exception\ArborApiException;
 use SimpleXMLElement;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -138,7 +136,7 @@ class WS extends API
         try {
             $response = $this->client->request('GET', $url, ['query' => $args]);
             $content = $response->getContent();
-        } catch (HttpExceptionInterface|DecodingExceptionInterface|TransportExceptionInterface $e) {
+        } catch (ExceptionInterface $e) {
             throw new ArborApiException('Error in HTTP request', 0, $e);
         }
 

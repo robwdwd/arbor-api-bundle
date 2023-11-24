@@ -12,10 +12,6 @@ namespace Robwdwd\ArborApiBundle\Rest;
 
 use Psr\Cache\CacheItemPoolInterface;
 use Robwdwd\ArborApiBundle\Exception\ArborApiException;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
-use Symfony\Component\HttpClient\Exception\TimeoutException;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
@@ -327,7 +323,7 @@ class REST
 
         try {
             return $this->client->request($method, $url, $options);
-        } catch (DecodingExceptionInterface|TransportExceptionInterface $e) {
+        } catch (ExceptionInterface $e) {
             throw new ArborApiException('Error connecting to the server.', 0, $e);
         }
     }
