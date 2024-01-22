@@ -246,8 +246,7 @@ Similar to findRest() except this returns results one page a time.
 
 > `` `findRest($endpoint, $field = null, $search = null, $perPage = 50) ``\`
 
-The following retrieves all customer managed objects from the Arbor
-Leader.
+The following retrieves interface lists for sightline
 
 ```php
 public function list(Request $request ArborRest $arborRest): Response
