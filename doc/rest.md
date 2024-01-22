@@ -239,3 +239,29 @@ public function list(Request $request ArborRest $arborRest): Response
 
 }
 ```
+
+## findRestPaged()
+
+Similar to findRest() except this returns results one page a time.
+
+> `` `findRest($endpoint, $field = null, $search = null, $perPage = 50) ``\`
+
+The following retrieves all customer managed objects from the Arbor
+Leader.
+
+```php
+public function list(Request $request ArborRest $arborRest): Response
+{
+    // findRestPaged(string $endpoint, array $filters = null, int $perPage = 50, bool $commitFlag = false)
+    $arborRestPaged->findRestPaged('traffic_query_facet_values/interfaces', null, 200, true);
+
+    do {
+        $result = $arborRestPaged->getCurrentData();
+
+        foreach ($result as $r) {
+            dump($r);
+        }
+    } while ($arborRestPaged->getNextPage());
+
+}
+```
