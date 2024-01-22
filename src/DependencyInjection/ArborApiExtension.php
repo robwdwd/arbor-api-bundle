@@ -34,6 +34,9 @@ class ArborApiExtension extends Extension
         $definitionRS = $container->getDefinition('robwdwd_arbor_api.rest.rest');
         $definitionRS->setArgument(2, $config);
 
+        $definitionRS = $container->getDefinition('robwdwd_arbor_api.rest.rest.paged');
+        $definitionRS->setArgument(2, $config);
+
         $definitionRSMO = $container->getDefinition('robwdwd_arbor_api.rest.managed_object');
         $definitionRSMO->setArgument(2, $config);
 
