@@ -283,6 +283,34 @@ class REST
     }
 
     /**
+     * Converts a filter into a valid URL.
+     *
+     * @param array $filters
+     *
+     * @return string Encoded URL string
+     */
+    protected function filterToUrl(array $filters)
+    {
+        if (isset($filters['type'])) {
+            return 'filter='.$filters['type'].'/'.$filters['field'].'.'.$filters['operator'].'.'.$this->searchFilterToUrl($filters['search']);
+        }
+        $filterArgs = [];
+
+        foreach ($filters as $filter) {
+            if ('eq' !== $filter['operator'] and 'cn' !== $filter['operator']) {
+                continue;
+            }
+
+            if ('a' !== $filter['type'] and 'r' !== $filter['type']) {
+                continue;
+            }
+            $filterArgs[] = 'filter[]='.$filter['type'].'/'.$filter['field'].'.'.$filter['operator'].'.'.$this->searchFilterToUrl($filter['search']);
+        }
+
+        return implode('&', $filterArgs);
+    }
+
+    /**
      * Converts a search filter into a valid url encoded search string.
      *
      * @param mixed $search
@@ -367,34 +395,6 @@ class REST
         }
 
         return $apiResult;
-    }
-
-    /**
-     * Converts a filter into a valid URL.
-     *
-     * @param array $filters
-     *
-     * @return string Encoded URL string
-     */
-    private function filterToUrl(array $filters)
-    {
-        if (isset($filters['type'])) {
-            return 'filter='.$filters['type'].'/'.$filters['field'].'.'.$filters['operator'].'.'.$this->searchFilterToUrl($filters['search']);
-        }
-        $filterArgs = [];
-
-        foreach ($filters as $filter) {
-            if ('eq' !== $filter['operator'] and 'cn' !== $filter['operator']) {
-                continue;
-            }
-
-            if ('a' !== $filter['type'] and 'r' !== $filter['type']) {
-                continue;
-            }
-            $filterArgs[] = 'filter[]='.$filter['type'].'/'.$filter['field'].'.'.$filter['operator'].'.'.$this->searchFilterToUrl($filter['search']);
-        }
-
-        return implode('&', $filterArgs);
     }
 
     /**
