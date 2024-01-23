@@ -2,7 +2,7 @@
 /*
  * This file is part of the Arbor API Bundle.
  *
- * Copyright 2022 Robert Woodward
+ * Copyright 2022-2024 Robert Woodward
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,17 +21,19 @@ use SoapFault;
  *
  * @author Rob Woodward <rob@emailplus.org>
  */
-class SOAP extends API
+class SOAP extends AbstractAPI
 {
-    private $hostname;
+    private readonly string $hostname;
 
-    private $username;
+    private readonly string $username;
 
-    private $password;
+    private readonly string $password;
 
-    private $wsdl;
+    private readonly string $wsdl;
 
-    private $cacheTtl;
+    private readonly int $cacheTtl;
+
+    private bool $shouldCache = true;
 
     /**
      * @param CacheInterface $cache

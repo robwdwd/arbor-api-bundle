@@ -2,7 +2,7 @@
 /*
  * This file is part of the Arbor API Bundle.
  *
- * Copyright 2022 Robert Woodward
+ * Copyright 2022-2024 Robert Woodward
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -23,22 +23,22 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
  */
 class REST
 {
-    protected $url;
-
-    private $restToken;
-
-    private $shouldCache;
-
-    private $cacheTtl;
+    protected readonly string $url;
 
     protected $cacheKeyPrefix = 'arbor_rest';
+
+    private readonly string $restToken;
+
+    private bool $shouldCache = true;
+
+    private readonly int $cacheTtl;
 
     /**
      * Contructor.
      *
-     * @param CacheInterface               $cache
-     * @param array                        $config Configuration
-     * @param protectedHttpClientInterface $client
+     * @param HttpClientInterface $client
+     * @param CacheInterface      $cache
+     * @param array               $config Configuration
      */
     public function __construct(protected HttpClientInterface $client, protected CacheItemPoolInterface $cache, array $config)
     {
@@ -101,7 +101,7 @@ class REST
      *
      * @param bool $cacheOn Cache or not
      */
-    public function shouldCache(bool $cacheOn)
+    public function setShouldCache(bool $cacheOn)
     {
         $this->shouldCache = $cacheOn;
     }
@@ -148,9 +148,9 @@ class REST
      * Perform multiple requests against the Arbor REST API.
      *
      * @param string $endpoint   endpoint to query against, see Arbor REST API documentation
+     * @param ?array $filters
      * @param int    $perPage    Total number of objects per page. (Default 50)
      * @param bool   $commitFlag Add config=commited to endpoints which require it, default false
-     * @param ?array $filters
      *
      * @return array The output of the API call
      */
@@ -448,8 +448,8 @@ class REST
      * Get the cache Key.
      *
      * @param string $url      URL to make the request against
-     * @param mixed  $postData
      * @param string $type
+     * @param mixed  $postData
      *
      * @return string cache key
      */

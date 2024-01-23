@@ -2,7 +2,7 @@
 /*
  * This file is part of the Arbor API Bundle.
  *
- * Copyright 2022 Robert Woodward
+ * Copyright 2022-2024 Robert Woodward
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,9 +21,9 @@ use SimpleXMLElement;
  *
  * @author Rob Woodward <rob@emailplus.org>
  */
-abstract class API
+abstract class AbstractAPI
 {
-    private ?bool $shouldCache = null;
+    private bool $shouldCache = true;
 
     /**
      * Get traffic XML from Arbor Sightline using the web services API.
@@ -328,7 +328,7 @@ abstract class API
      *
      * @param bool $cacheOn Cache or not
      */
-    public function shouldCache(bool $cacheOn)
+    public function setShouldCache(bool $cacheOn)
     {
         $this->shouldCache = $cacheOn;
     }

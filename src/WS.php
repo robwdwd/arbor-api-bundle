@@ -2,7 +2,7 @@
 /*
  * This file is part of the Arbor API Bundle.
  *
- * Copyright 2022 Robert Woodward
+ * Copyright 2022-2024 Robert Woodward
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,18 +21,20 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  *
  * @author Rob Woodward <rob@emailplus.org>
  */
-class WS extends API
+class WS extends AbstractAPI
 {
-    private $wsKey;
+    private readonly string $wsKey;
 
     private readonly string $url;
 
-    private $cacheTtl;
+    private readonly int $cacheTtl;
+
+    private bool $shouldCache = true;
 
     /**
-     * @param CacheInterface                     $cache
-     * @param privatereadonlyHttpClientInterface $client
-     * @param array                              $config
+     * @param HttpClientInterface $client
+     * @param CacheInterface      $cache
+     * @param array               $config
      */
     public function __construct(private readonly HttpClientInterface $client, private readonly CacheItemPoolInterface $cache, array $config)
     {
